@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ПВЗ — Финансовый отчёт</title>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@300;400;600;700&family=Geologica:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root {
+  --bg:#0b0d14; --bg2:#111420; --bg3:#171b2a;
+  --card:#1a1f30; --card2:#1f2538;
+  --border:#2a3050; --border2:#3a4468;
+  --accent:#7c6dfa; --accent2:#4e9eff; --accent3:#f5a623;
+  --green:#3ecf8e; --red:#ff4d6d;
+  --text:#e8eaf0; --text2:#a0a8c0; --text3:#606888;
+  --wb:#a855f7; --ozon:#3b82f6; --yams:#f59e0b;
+  --input-bg:#0f1220; --input-border:#2a3050; --input-focus:#7c6dfa;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'Geologica',sans-serif;font-size:13px;min-height:100vh;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");pointer-events:none;z-index:9999;opacity:.35;}
+
+/* HEADER */
+.header{padding:24px 40px 20px;display:flex;align-items:flex-end;justify-content:space-between;border-bottom:1px solid var(--border);background:linear-gradient(180deg,rgba(124,109,250,.07) 0%,transparent 100%);position:relative;overflow:hidden;}
+.header::after{content:'';position:absolute;top:-60px;right:-60px;width:260px;height:260px;background:radial-gradient(circle,rgba(124,109,250,.1) 0%,transparent 70%);pointer-events:none;}
+.logo h1{font-family:'Unbounded',sans-serif;font-size:20px;font-weight:700;letter-spacing:-.5px;background:linear-gradient(135deg,#e8eaf0 0%,#a0a8c0 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.logo p{font-size:11px;color:var(--text3);margin-top:3px;letter-spacing:.5px;text-transform:uppercase;}
+.hdr-stats{display:flex;gap:28px;align-items:center;}
+.hdr-stat .v{font-family:'Unbounded',sans-serif;font-size:17px;font-weight:600;text-align:right;}
+.hdr-stat .v.pos{color:var(--green);}
+.hdr-stat .v.neg{color:var(--red);}
+.hdr-stat .v.neu{color:var(--text);}
+.hdr-stat .l{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;text-align:right;}
+
+/* NAV */
+.nav{display:flex;padding:0 40px;background:var(--bg2);border-bottom:1px solid var(--border);overflow-x:auto;gap:0;}
+.nav-btn{padding:14px 22px;font-family:'Geologica',sans-serif;font-size:12px;font-weight:500;color:var(--text3);background:none;border:none;cursor:pointer;position:relative;white-space:nowrap;transition:color .2s;letter-spacing:.3px;}
+.nav-btn::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--accent);transform:scaleX(0);transition:transform .2s;}
+.nav-btn:hover{color:var(--text2);}
+.nav-btn.active{color:var(--text);}
+.nav-btn.active::after{transform:scaleX(1);}
+.nav-btn.edit-mode-active{color:var(--accent);}
+
+/* MAIN */
+.main{padding:28px 40px;}
+.tab-content{display:none;}
+.tab-content.active{display:block;}
+
+/* KPI */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px;}
+.kpi-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px;position:relative;overflow:hidden;transition:border-color .2s,transform .2s;animation:fadeUp .4s ease both;}
+.kpi-card:hover{border-color:var(--border2);transform:translateY(-1px);}
+.kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+.kpi-card.wb::before{background:var(--wb);}
+.kpi-card.oz::before{background:var(--ozon);}
+.kpi-card.ym::before{background:var(--yams);}
+.kpi-card.tot::before{background:linear-gradient(90deg,var(--accent),var(--accent2));}
+.kpi-card:nth-child(2){animation-delay:.05s;}
+.kpi-card:nth-child(3){animation-delay:.1s;}
+.kpi-card:nth-child(4){animation-delay:.15s;}
+.kpi-lbl{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.7px;margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+.kpi-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.kpi-val{font-family:'Unbounded',sans-serif;font-size:18px;font-weight:600;letter-spacing:-.5px;}
+.kpi-val.pos{color:var(--green);}
+.kpi-val.neg{color:var(--red);}
+.kpi-val.neu{color:var(--text);}
+.kpi-sub{font-size:10px;color:var(--text3);margin-top:5px;}
+
+/* SECTION */
+.section{margin-bottom:24px;}
+.sec-title{font-family:'Unbounded',sans-serif;font-size:11px;font-weight:600;color:var(--text2);letter-spacing:.5px;margin-bottom:14px;display:flex;align-items:center;gap:10px;}
+.sec-title::after{content:'';flex:1;height:1px;background:var(--border);}
+
+/* CHART CARD */
+.chart-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:22px;}
+.chart-wrap{height:260px;position:relative;}
+.legend{display:flex;gap:18px;margin-top:12px;flex-wrap:wrap;}
+.leg-item{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text2);}
+.leg-dot{width:8px;height:8px;border-radius:2px;}
+
+/* PVZ GRID */
+.pvz-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+.pvz-card{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;transition:border-color .2s;}
+.pvz-card:hover{border-color:var(--border2);}
+.pvz-head{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--bg3);}
+.pvz-name{font-family:'Unbounded',sans-serif;font-size:12px;font-weight:600;display:flex;align-items:center;gap:8px;}
+.pvz-pdot{width:9px;height:9px;border-radius:50%;}
+.pvz-profit{font-family:'Unbounded',sans-serif;font-size:14px;font-weight:700;}
+.pvz-profit.pos{color:var(--green);}
+.pvz-profit.neg{color:var(--red);}
+.mini-bars{display:flex;align-items:flex-end;gap:2px;height:30px;padding:0 18px 12px;}
+.mini-bar{flex:1;border-radius:2px 2px 0 0;min-height:2px;cursor:pointer;transition:opacity .15s;}
+.mini-bar.pos{background:var(--green);opacity:.65;}
+.mini-bar.neg{background:var(--red);opacity:.65;}
+.mini-bar:hover{opacity:1;}
+
+/* TABLE */
+.tbl-wrap{overflow-x:auto;}
+.pvz-tbl{width:100%;border-collapse:collapse;min-width:700px;}
+.pvz-tbl th{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.4px;font-weight:500;padding:9px 12px;text-align:right;border-bottom:1px solid var(--border);background:var(--bg3);white-space:nowrap;}
+.pvz-tbl th:first-child{text-align:left;}
+.pvz-tbl td{padding:8px 12px;font-size:11px;text-align:right;border-bottom:1px solid rgba(42,48,80,.4);color:var(--text2);white-space:nowrap;}
+.pvz-tbl td:first-child{text-align:left;color:var(--text3);}
+.pvz-tbl tr:last-child td{border-bottom:none;}
+.pvz-tbl tr.hl td{background:rgba(124,109,250,.06);font-weight:600;color:var(--text);}
+.pvz-tbl tr:hover td{background:rgba(255,255,255,.015);}
+.np{color:var(--green)!important;}
+.nn{color:var(--red)!important;}
+.nw{color:var(--text2)!important;}
+
+/* ============================================================
+   EDITOR PANEL
+   ============================================================ */
+.editor-panel{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;}
+.editor-header{padding:18px 22px;background:var(--bg3);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:gap;}
+.editor-title{font-family:'Unbounded',sans-serif;font-size:13px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:10px;}
+.editor-actions{display:flex;gap:10px;align-items:center;}
+
+/* PVZ selector tabs inside editor */
+.pvz-tabs{display:flex;gap:0;border-bottom:1px solid var(--border);background:var(--bg3);}
+.pvz-tab{padding:11px 18px;font-size:11px;font-weight:500;color:var(--text3);background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:7px;white-space:nowrap;transition:color .15s;position:relative;}
+.pvz-tab::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;transform:scaleX(0);transition:transform .2s;}
+.pvz-tab.active{color:var(--text);}
+.pvz-tab.active::after{transform:scaleX(1);}
+.pvz-tab:hover{color:var(--text2);}
+.ptdot{width:7px;height:7px;border-radius:50%;}
+
+/* Month selector */
+.month-selector{display:flex;gap:6px;padding:14px 20px;flex-wrap:wrap;border-bottom:1px solid var(--border);background:var(--bg2);}
+.mon-btn{padding:5px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;font-size:11px;color:var(--text3);cursor:pointer;transition:all .15s;font-family:'Geologica',sans-serif;}
+.mon-btn:hover{border-color:var(--border2);color:var(--text2);}
+.mon-btn.active{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:500;}
+
+/* Entry form grid */
+.entry-form{padding:22px;}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+.form-col h3{font-family:'Unbounded',sans-serif;font-size:11px;font-weight:600;letter-spacing:.5px;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--border);}
+.form-col.income-col h3{color:var(--green);}
+.form-col.expense-col h3{color:var(--red);}
+.field-group{display:flex;flex-direction:column;gap:10px;}
+.field-row{display:grid;grid-template-columns:1fr 130px;gap:8px;align-items:center;}
+.field-row label{font-size:11px;color:var(--text2);padding-left:2px;}
+.field-row input{background:var(--input-bg);border:1px solid var(--input-border);border-radius:8px;padding:8px 12px;font-family:'Geologica',sans-serif;font-size:12px;color:var(--text);outline:none;transition:border-color .15s;text-align:right;width:100%;}
+.field-row input:focus{border-color:var(--input-focus);background:#0d1018;}
+.field-row input::placeholder{color:var(--text3);}
+.field-row input.has-val{border-color:rgba(124,109,250,.4);}
+
+/* Custom fields */
+.custom-fields{margin-top:12px;}
+.custom-field-row{display:grid;grid-template-columns:1fr 130px 28px;gap:6px;align-items:center;margin-bottom:8px;}
+.custom-field-row input[type=text]{background:var(--input-bg);border:1px solid var(--input-border);border-radius:8px;padding:7px 10px;font-size:11px;color:var(--text);outline:none;font-family:'Geologica',sans-serif;transition:border-color .15s;}
+.custom-field-row input[type=text]:focus{border-color:var(--input-focus);}
+.custom-field-row input[type=number]{background:var(--input-bg);border:1px solid var(--input-border);border-radius:8px;padding:7px 10px;font-size:11px;color:var(--text);outline:none;font-family:'Geologica',sans-serif;text-align:right;transition:border-color .15s;}
+.custom-field-row input[type=number]:focus{border-color:var(--input-focus);}
+.del-btn{background:none;border:none;cursor:pointer;color:var(--text3);font-size:16px;line-height:1;transition:color .15s;padding:2px;}
+.del-btn:hover{color:var(--red);}
+.add-field-btn{background:none;border:1px dashed var(--border2);border-radius:8px;padding:7px 14px;font-size:11px;color:var(--text3);cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:6px;font-family:'Geologica',sans-serif;margin-top:4px;}
+.add-field-btn:hover{border-color:var(--accent);color:var(--accent);}
+
+/* Summary bar inside form */
+.form-summary{margin-top:20px;padding:14px 16px;background:var(--bg3);border-radius:10px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+.sum-item .s-lbl{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;}
+.sum-item .s-val{font-family:'Unbounded',sans-serif;font-size:14px;font-weight:600;}
+.sum-item .s-val.pos{color:var(--green);}
+.sum-item .s-val.neg{color:var(--red);}
+.sum-item .s-val.neu{color:var(--text);}
+
+/* Buttons */
+.btn{padding:9px 18px;border-radius:9px;font-family:'Geologica',sans-serif;font-size:12px;font-weight:500;cursor:pointer;transition:all .15s;border:none;display:inline-flex;align-items:center;gap:7px;}
+.btn-primary{background:var(--accent);color:#fff;}
+.btn-primary:hover{background:#6c5de8;transform:translateY(-1px);}
+.btn-ghost{background:transparent;color:var(--text2);border:1px solid var(--border);}
+.btn-ghost:hover{border-color:var(--border2);color:var(--text);}
+.btn-danger{background:rgba(255,77,109,.15);color:var(--red);border:1px solid rgba(255,77,109,.3);}
+.btn-danger:hover{background:rgba(255,77,109,.25);}
+.btn-sm{padding:6px 12px;font-size:11px;}
+
+/* Toast */
+.toast{position:fixed;bottom:28px;right:28px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 18px;font-size:12px;color:var(--text);z-index:10000;transform:translateY(80px);opacity:0;transition:all .3s;display:flex;align-items:center;gap:10px;}
+.toast.show{transform:translateY(0);opacity:1;}
+.toast.success{border-color:rgba(62,207,142,.4);background:rgba(62,207,142,.08);}
+.toast.error{border-color:rgba(255,77,109,.4);background:rgba(255,77,109,.08);}
+
+/* Add PVZ modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:1000;display:none;align-items:center;justify-content:center;}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:28px;width:420px;max-width:calc(100vw - 40px);animation:fadeUp .25s ease;}
+.modal h2{font-family:'Unbounded',sans-serif;font-size:15px;font-weight:600;margin-bottom:6px;}
+.modal p{font-size:12px;color:var(--text3);margin-bottom:20px;}
+.modal-field{margin-bottom:14px;}
+.modal-field label{display:block;font-size:11px;color:var(--text2);margin-bottom:6px;}
+.modal-field input{width:100%;background:var(--input-bg);border:1px solid var(--input-border);border-radius:8px;padding:10px 12px;font-family:'Geologica',sans-serif;font-size:13px;color:var(--text);outline:none;transition:border-color .15s;}
+.modal-field input:focus{border-color:var(--input-focus);}
+.color-picker-row{display:flex;gap:8px;flex-wrap:wrap;}
+.cpick{width:28px;height:28px;border-radius:50%;border:2px solid transparent;cursor:pointer;transition:transform .15s;}
+.cpick:hover,.cpick.sel{border-color:var(--text);transform:scale(1.15);}
+.modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:20px;}
+
+/* Manage months modal */
+.months-manage{display:flex;flex-direction:column;gap:8px;max-height:260px;overflow-y:auto;}
+.month-manage-row{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--bg3);border-radius:8px;}
+.month-manage-row .m-name{font-size:12px;color:var(--text2);}
+.add-month-row{display:flex;gap:8px;margin-top:12px;}
+.add-month-row input{flex:1;background:var(--input-bg);border:1px solid var(--input-border);border-radius:8px;padding:8px 12px;font-family:'Geologica',sans-serif;font-size:12px;color:var(--text);outline:none;}
+.add-month-row input:focus{border-color:var(--input-focus);}
+
+/* Scrollbar */
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-track{background:var(--bg);}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+@media(max-width:1100px){.kpi-grid{grid-template-columns:repeat(2,1fr)}.pvz-grid{grid-template-columns:1fr}.form-grid{grid-template-columns:1fr}}
+@media(max-width:700px){.main{padding:20px 16px}.header{padding:18px 16px}.nav{padding:0 16px}.hdr-stats{display:none}}
+
+/* number input arrows hide */
+input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;}
+input[type=number]{-moz-appearance:textfield;}
+</style>
+</head>
+<body>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- ADD PVZ MODAL -->
+<div class="modal-overlay" id="modalAddPvz">
+  <div class="modal">
+    <h2>Новый ПВЗ</h2>
+    <p>Добавьте пункт выдачи заказов в систему</p>
+    <div class="modal-field"><label>Название ПВЗ</label><input id="newPvzName" placeholder="Например: Садовая 12" /></div>
+    <div class="modal-field">
+      <label>Цвет</label>
+      <div class="color-picker-row" id="colorPicker">
+        <div class="cpick sel" style="background:#a855f7" data-color="#a855f7"></div>
+        <div class="cpick" style="background:#3b82f6" data-color="#3b82f6"></div>
+        <div class="cpick" style="background:#f59e0b" data-color="#f59e0b"></div>
+        <div class="cpick" style="background:#3ecf8e" data-color="#3ecf8e"></div>
+        <div class="cpick" style="background:#ef4444" data-color="#ef4444"></div>
+        <div class="cpick" style="background:#06b6d4" data-color="#06b6d4"></div>
+        <div class="cpick" style="background:#f97316" data-color="#f97316"></div>
+        <div class="cpick" style="background:#ec4899" data-color="#ec4899"></div>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modalAddPvz')">Отмена</button>
+      <button class="btn btn-primary" onclick="addPvz()">Добавить ПВЗ</button>
+    </div>
+  </div>
+</div>
+
+<!-- MANAGE MONTHS MODAL -->
+<div class="modal-overlay" id="modalMonths">
+  <div class="modal">
+    <h2>Управление периодами</h2>
+    <p>Добавьте или удалите месяцы/периоды отчётности</p>
+    <div class="months-manage" id="monthsManageList"></div>
+    <div class="add-month-row">
+      <input id="newMonthName" placeholder="Например: Июль 2025" />
+      <button class="btn btn-primary btn-sm" onclick="addMonth()">Добавить</button>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modalMonths')">Закрыть</button>
+    </div>
+  </div>
+</div>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="logo">
+    <h1>ПВЗ · Финансы</h1>
+    <p>Пункты выдачи заказов — сводный отчёт</p>
+  </div>
+  <div class="hdr-stats">
+    <div class="hdr-stat">
+      <div class="v" id="hdr-total">— ₽</div>
+      <div class="l">Итого прибыль</div>
+    </div>
+    <div class="hdr-stat">
+      <div class="v neu" id="hdr-pvz-count">0 точек</div>
+      <div class="l">Активных ПВЗ</div>
+    </div>
+  </div>
+</header>
+
+<!-- NAV -->
+<nav class="nav" id="mainNav">
+  <button class="nav-btn active" onclick="showTab('overview',this)">Обзор</button>
+  <button class="nav-btn" onclick="showTab('editor',this)">✏️ Ввод данных</button>
+</nav>
+
+<!-- MAIN -->
+<main class="main">
+
+  <!-- OVERVIEW -->
+  <div class="tab-content active" id="tab-overview">
+    <div class="kpi-grid" id="kpiGrid"></div>
+    <div class="section">
+      <div class="sec-title">Прибыль по ПВЗ — помесячно</div>
+      <div class="chart-card">
+        <div class="chart-wrap"><canvas id="mainChart"></canvas></div>
+        <div class="legend" id="mainLegend"></div>
+      </div>
+    </div>
+    <div class="section">
+      <div class="sec-title">Сводка по точкам</div>
+      <div class="pvz-grid" id="pvzOverviewGrid"></div>
+    </div>
+  </div>
+
+  <!-- EDITOR -->
+  <div class="tab-content" id="tab-editor">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:12px;">
+      <div>
+        <div style="font-family:'Unbounded',sans-serif;font-size:14px;font-weight:600;margin-bottom:4px;">Ввод данных</div>
+        <div style="font-size:11px;color:var(--text3);">Вводите доходы и расходы по каждому ПВЗ и периоду. Данные сохраняются автоматически.</div>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <button class="btn btn-ghost btn-sm" onclick="openModal('modalMonths');renderMonthsManage()">📅 Периоды</button>
+        <button class="btn btn-ghost btn-sm" onclick="openModal('modalAddPvz')">＋ Добавить ПВЗ</button>
+        <button class="btn btn-danger btn-sm" onclick="confirmReset()">↺ Сброс</button>
+      </div>
+    </div>
+
+    <div class="editor-panel">
+      <!-- PVZ tabs -->
+      <div class="pvz-tabs" id="editorPvzTabs"></div>
+
+      <!-- Month selector -->
+      <div class="month-selector" id="editorMonthSelector"></div>
+
+      <!-- Form -->
+      <div class="entry-form" id="entryForm"></div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+// ======================================================
+// STATE
+// ======================================================
+
+const DEFAULT_MONTHS = ['Июн 24','Июл 24','Авг 24','Сен 24','Окт 24','Ноя 24','Дек 24','Янв 25','Фев 25','Мар 25','Апр 25','Май 25'];
+
+const DEFAULT_INCOME_FIELDS = [
+  {key:'agent', label:'Агент. вознаграждение'},
+  {key:'market', label:'Я Маркет'},
+  {key:'brandland', label:'BrandLand'},
+  {key:'bonuses', label:'Бонусы'},
+  {key:'other_income', label:'Прочие доходы'},
+];
+
+const DEFAULT_EXPENSE_FIELDS = [
+  {key:'nalog', label:'Налог'},
+  {key:'arenda', label:'Аренда'},
+  {key:'zarplata', label:'Зарплата'},
+  {key:'internet', label:'Интернет + Камера'},
+  {key:'kanc', label:'Канцелярия / разное'},
+];
+
+const PVZ_COLORS = ['#a855f7','#3b82f6','#f59e0b','#3ecf8e','#ef4444','#06b6d4','#f97316','#ec4899'];
+
+// Load or init state
+function loadState() {
+  try {
+    const raw = localStorage.getItem('pvz_data_v3');
+    if (raw) return JSON.parse(raw);
+  } catch(e) {}
+  return initDefaultState();
+}
+
+function initDefaultState() {
+  return {
+    months: [...DEFAULT_MONTHS],
+    pvzList: [
+      { id: 'pvz1', name: 'Луна Искусства 35', color: '#a855f7',
+        incomeFields: JSON.parse(JSON.stringify(DEFAULT_INCOME_FIELDS)),
+        expenseFields: JSON.parse(JSON.stringify(DEFAULT_EXPENSE_FIELDS)),
+        data: {}
+      },
+      { id: 'pvz2', name: 'Розалина 46', color: '#ef4444',
+        incomeFields: JSON.parse(JSON.stringify(DEFAULT_INCOME_FIELDS)),
+        expenseFields: JSON.parse(JSON.stringify(DEFAULT_EXPENSE_FIELDS)),
+        data: {}
+      },
+      { id: 'pvz3', name: 'Краснодарская 37', color: '#f59e0b',
+        incomeFields: JSON.parse(JSON.stringify(DEFAULT_INCOME_FIELDS)),
+        expenseFields: JSON.parse(JSON.stringify(DEFAULT_EXPENSE_FIELDS)),
+        data: {}
+      },
+      { id: 'pvz4', name: 'Солнечная 36', color: '#3b82f6',
+        incomeFields: JSON.parse(JSON.stringify(DEFAULT_INCOME_FIELDS)),
+        expenseFields: JSON.parse(JSON.stringify(DEFAULT_EXPENSE_FIELDS)),
+        data: {}
+      },
+    ]
+  };
+}
+
+let state = loadState();
+
+function saveState() {
+  localStorage.setItem('pvz_data_v3', JSON.stringify(state));
+}
+
+// Editor state
+let editorPvzId = state.pvzList[0]?.id;
+let editorMonthIdx = 0;
+let mainChartInst = null;
+
+// ======================================================
+// CALCULATIONS
+// ======================================================
+
+function getVal(pvz, monthIdx, fieldKey) {
+  return Number(pvz.data?.[monthIdx]?.[fieldKey] || 0);
+}
+
+function calcMonthIncome(pvz, mIdx) {
+  return pvz.incomeFields.reduce((s,f) => s + getVal(pvz, mIdx, f.key), 0);
+}
+
+function calcMonthExpense(pvz, mIdx) {
+  return pvz.expenseFields.reduce((s,f) => s + getVal(pvz, mIdx, f.key), 0);
+}
+
+function calcMonthProfit(pvz, mIdx) {
+  return calcMonthIncome(pvz, mIdx) - calcMonthExpense(pvz, mIdx);
+}
+
+function calcTotalProfit(pvz) {
+  return state.months.reduce((s,_,i) => s + calcMonthProfit(pvz, i), 0);
+}
+
+function calcAllTotal() {
+  return state.pvzList.reduce((s, pvz) => s + calcTotalProfit(pvz), 0);
+}
+
+// ======================================================
+// UTILS
+// ======================================================
+
+function fmtNum(n, sign=false) {
+  if (!n && n !== 0) return '—';
+  const abs = Math.abs(n);
+  let s;
+  if (abs >= 1e6) s = (n/1e6).toFixed(1) + 'М';
+  else if (abs >= 1e4) s = (n/1e3).toFixed(0) + ' тыс';
+  else s = Math.round(n).toLocaleString('ru');
+  return (sign && n > 0 ? '+' : '') + s + ' ₽';
+}
+
+function fmtFull(n) {
+  const s = n < 0 ? '−' : '';
+  return s + Math.abs(Math.round(n)).toLocaleString('ru') + ' ₽';
+}
+
+function numClass(n) { return n > 0 ? 'pos' : n < 0 ? 'neg' : 'neu'; }
+
+function uid() { return 'f_' + Math.random().toString(36).slice(2,8); }
+
+function toast(msg, type='success') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = `toast ${type} show`;
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.classList.remove('show'), 2200);
+}
+
+// ======================================================
+// TABS
+// ======================================================
+
+function showTab(id, btn) {
+  document.querySelectorAll('.tab-content').forEach(e => e.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(e => e.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  if (btn) btn.classList.add('active');
+  if (id === 'overview') renderOverview();
+  if (id === 'editor') renderEditor();
+}
+
+// ======================================================
+// OVERVIEW
+// ======================================================
+
+function renderOverview() {
+  renderKPI();
+  renderMainChart();
+  renderPvzOverview();
+  updateHeader();
+}
+
+function updateHeader() {
+  const total = calcAllTotal();
+  const el = document.getElementById('hdr-total');
+  el.textContent = (total >= 0 ? '+' : '') + fmtFull(total);
+  el.className = 'v ' + numClass(total);
+  document.getElementById('hdr-pvz-count').textContent = state.pvzList.length + ' точек';
+}
+
+function renderKPI() {
+  const grid = document.getElementById('kpiGrid');
+  const classes = ['wb','oz','ym','tot'];
+  const dots = ['#a855f7','#3b82f6','#f59e0b',''];
+  grid.innerHTML = '';
+
+  // Per-PVZ KPIs (first 3), then total
+  const show = state.pvzList.slice(0, 3);
+  show.forEach((pvz, i) => {
+    const total = calcTotalProfit(pvz);
+    const div = document.createElement('div');
+    div.className = 'kpi-card ' + (classes[i]||'tot');
+    div.style.cssText = `--before-bg:${pvz.color}`;
+    div.innerHTML = `<div class="kpi-lbl"><span class="kpi-dot" style="background:${pvz.color}"></span>${pvz.name}</div>
+      <div class="kpi-val ${numClass(total)}">${total >= 0 ? '+' : ''}${fmtFull(total)}</div>
+      <div class="kpi-sub">Итого прибыль</div>`;
+    grid.appendChild(div);
+  });
+
+  const allTotal = calcAllTotal();
+  const totDiv = document.createElement('div');
+  totDiv.className = 'kpi-card tot';
+  totDiv.innerHTML = `<div class="kpi-lbl">Общий итог</div>
+    <div class="kpi-val ${numClass(allTotal)}">${allTotal >= 0 ? '+' : ''}${fmtFull(allTotal)}</div>
+    <div class="kpi-sub">Все точки · ${state.pvzList.length} ПВЗ</div>`;
+  grid.appendChild(totDiv);
+}
+
+function renderMainChart() {
+  const ctx = document.getElementById('mainChart').getContext('2d');
+  if (mainChartInst) { mainChartInst.destroy(); mainChartInst = null; }
+
+  const datasets = state.pvzList.map(pvz => ({
+    label: pvz.name,
+    data: state.months.map((_,i) => calcMonthProfit(pvz, i)),
+    borderColor: pvz.color,
+    backgroundColor: pvz.color + '18',
+    pointBackgroundColor: pvz.color,
+    pointRadius: 4, pointHoverRadius: 6,
+    borderWidth: 2, tension: 0.3, fill: false,
+  }));
+
+  mainChartInst = new Chart(ctx, {
+    type: 'line',
+    data: { labels: state.months, datasets },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#1a1f30', borderColor: '#2a3050', borderWidth: 1,
+          titleColor: '#a0a8c0', bodyColor: '#e8eaf0', padding: 12,
+          callbacks: { label: c => ` ${c.dataset.label}: ${c.raw >= 0 ? '+' : ''}${fmtFull(c.raw)}` }
+        }
+      },
+      scales: {
+        x: { grid: { color: 'rgba(42,48,80,.5)' }, ticks: { color: '#606888', font: { size: 10 } } },
+        y: { grid: { color: 'rgba(42,48,80,.5)' }, ticks: { color: '#606888', font: { size: 10 },
+          callback: v => Math.abs(v) >= 1e6 ? (v/1e6).toFixed(1)+'М' : Math.abs(v) >= 1e3 ? (v/1e3).toFixed(0)+'К' : v
+        }}
+      }
+    }
+  });
+
+  // Legend
+  document.getElementById('mainLegend').innerHTML = state.pvzList.map(pvz =>
+    `<div class="leg-item"><span class="leg-dot" style="background:${pvz.color}"></span>${pvz.name}</div>`
+  ).join('');
+}
+
+function renderPvzOverview() {
+  const grid = document.getElementById('pvzOverviewGrid');
+  if (!state.pvzList.length) {
+    grid.innerHTML = `<div style="padding:40px;text-align:center;color:var(--text3);grid-column:1/-1">Нет ПВЗ. Добавьте точки во вкладке «Ввод данных».</div>`;
+    return;
+  }
+
+  grid.innerHTML = state.pvzList.map(pvz => {
+    const profits = state.months.map((_,i) => calcMonthProfit(pvz, i));
+    const total = profits.reduce((a,b) => a+b, 0);
+    const maxAbs = Math.max(...profits.map(Math.abs), 1);
+
+    const bars = profits.map((v,i) => {
+      const h = Math.max(2, Math.round((Math.abs(v)/maxAbs)*28));
+      return `<div class="mini-bar ${v>=0?'pos':'neg'}" style="height:${h}px" title="${state.months[i]}: ${v>=0?'+':''}${fmtFull(v)}"></div>`;
+    }).join('');
+
+    const topRows = [...pvz.incomeFields.slice(0,1), ...pvz.expenseFields.slice(0,2)];
+
+    return `<div class="pvz-card">
+      <div class="pvz-head">
+        <div class="pvz-name"><div class="pvz-pdot" style="background:${pvz.color}"></div>${pvz.name}</div>
+        <div class="pvz-profit ${numClass(total)}">${total>=0?'+':''}${fmtFull(total)}</div>
+      </div>
+      <div class="mini-bars">${bars}</div>
+      <div class="tbl-wrap"><table class="pvz-tbl">
+        <thead><tr><th>Статья</th>${state.months.map(m=>`<th>${m}</th>`).join('')}<th>Итого</th></tr></thead>
+        <tbody>
+          <tr><td>Доходы</td>${state.months.map((_,i)=>{const v=calcMonthIncome(pvz,i);return `<td class="${v?'np':''}"> ${v?Math.round(v).toLocaleString('ru'):'—'}</td>`;}).join('')}<td class="np">${Math.round(state.months.reduce((_,__,i)=>_+calcMonthIncome(pvz,i),0)).toLocaleString('ru')}</td></tr>
+          <tr><td>Расходы</td>${state.months.map((_,i)=>{const v=calcMonthExpense(pvz,i);return `<td class="${v?'nn':''}"> ${v?Math.round(v).toLocaleString('ru'):'—'}</td>`;}).join('')}<td class="nn">${Math.round(state.months.reduce((_,__,i)=>_+calcMonthExpense(pvz,i),0)).toLocaleString('ru')}</td></tr>
+          <tr class="hl"><td>Прибыль</td>${profits.map(v=>`<td class="${v>0?'np':v<0?'nn':''}">${v!==0?(v>0?'+':'')+Math.round(v).toLocaleString('ru'):'—'}</td>`).join('')}<td class="${numClass(total)}">${total>=0?'+':''}${Math.round(total).toLocaleString('ru')}</td></tr>
+        </tbody>
+      </table></div>
+    </div>`;
+  }).join('');
+}
+
+// ======================================================
+// EDITOR
+// ======================================================
+
+function renderEditor() {
+  renderEditorTabs();
+  renderEditorMonths();
+  renderEntryForm();
+}
+
+function renderEditorTabs() {
+  const tabs = document.getElementById('editorPvzTabs');
+  tabs.innerHTML = state.pvzList.map(pvz =>
+    `<button class="pvz-tab ${pvz.id === editorPvzId ? 'active' : ''}"
+      style="--tab-color:${pvz.color}"
+      onclick="selectEditorPvz('${pvz.id}')">
+      <span class="ptdot" style="background:${pvz.color}"></span>${pvz.name}
+    </button>`
+  ).join('');
+
+  // Color the active tab underline
+  document.querySelectorAll('.pvz-tab').forEach(btn => {
+    btn.style.setProperty('--tab-color', btn.querySelector('.ptdot').style.background);
+    btn.querySelector('::after');
+  });
+  // Apply active color via inline style hack
+  const activeTabs = document.querySelectorAll('.pvz-tab.active');
+  activeTabs.forEach(t => {
+    t.style.color = 'var(--text)';
+    // inject after pseudo via CSS var trick
+  });
+}
+
+// Fix tab underline colors dynamically
+document.addEventListener('click', e => {
+  if (e.target.closest('.pvz-tab')) {
+    document.querySelectorAll('.pvz-tab').forEach(t => t.style.removeProperty('border-bottom-color'));
+  }
+});
+
+function selectEditorPvz(id) {
+  editorPvzId = id;
+  editorMonthIdx = 0;
+  renderEditorTabs();
+  renderEditorMonths();
+  renderEntryForm();
+}
+
+function renderEditorMonths() {
+  const sel = document.getElementById('editorMonthSelector');
+  sel.innerHTML = state.months.map((m,i) =>
+    `<button class="mon-btn ${i===editorMonthIdx?'active':''}" onclick="selectEditorMonth(${i})">${m}</button>`
+  ).join('');
+}
+
+function selectEditorMonth(idx) {
+  editorMonthIdx = idx;
+  renderEditorMonths();
+  renderEntryForm();
+}
+
+function getCurrentPvz() {
+  return state.pvzList.find(p => p.id === editorPvzId);
+}
+
+function renderEntryForm() {
+  const pvz = getCurrentPvz();
+  if (!pvz) {
+    document.getElementById('entryForm').innerHTML = `<div style="padding:40px;text-align:center;color:var(--text3)">Выберите ПВЗ</div>`;
+    return;
+  }
+
+  const mIdx = editorMonthIdx;
+  const mName = state.months[mIdx];
+  const income = calcMonthIncome(pvz, mIdx);
+  const expense = calcMonthExpense(pvz, mIdx);
+  const profit = income - expense;
+
+  const incRows = pvz.incomeFields.map(f => buildFieldRow(pvz, mIdx, f, 'income')).join('');
+  const expRows = pvz.expenseFields.map(f => buildFieldRow(pvz, mIdx, f, 'expense')).join('');
+
+  document.getElementById('entryForm').innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:10px;">
+      <div>
+        <div style="font-family:'Unbounded',sans-serif;font-size:13px;font-weight:600;">${pvz.name}</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:3px;">Период: ${mName}</div>
+      </div>
+      <button class="btn btn-danger btn-sm" onclick="clearMonthData('${pvz.id}',${mIdx})">✕ Очистить период</button>
+    </div>
+
+    <div class="form-grid">
+      <div class="form-col income-col">
+        <h3>▲ ДОХОДЫ</h3>
+        <div class="field-group" id="incomeFields">${incRows}</div>
+        <div class="custom-fields" id="incomeCustom"></div>
+        <button class="add-field-btn" onclick="addCustomField('income')">＋ Добавить строку дохода</button>
+      </div>
+      <div class="form-col expense-col">
+        <h3>▼ РАСХОДЫ</h3>
+        <div class="field-group" id="expenseFields">${expRows}</div>
+        <div class="custom-fields" id="expenseCustom"></div>
+        <button class="add-field-btn" onclick="addCustomField('expense')">＋ Добавить строку расхода</button>
+      </div>
+    </div>
+
+    <div class="form-summary" id="formSummary">
+      <div class="sum-item"><div class="s-lbl">Доходы</div><div class="s-val pos" id="sum-income">${fmtFull(income)}</div></div>
+      <div class="sum-item"><div class="s-lbl">Расходы</div><div class="s-val neg" id="sum-expense">${fmtFull(expense)}</div></div>
+      <div class="sum-item"><div class="s-lbl">Прибыль</div><div class="s-val ${numClass(profit)}" id="sum-profit">${profit>=0?'+':''}${fmtFull(profit)}</div></div>
+    </div>
+  `;
+}
+
+function buildFieldRow(pvz, mIdx, field, type) {
+  const v = getVal(pvz, mIdx, field.key);
+  const hasVal = v !== 0;
+  return `<div class="field-row" id="row-${field.key}">
+    <label>${field.label}</label>
+    <input type="number" class="${hasVal?'has-val':''}" value="${hasVal ? v : ''}" placeholder="0"
+      oninput="handleInput(this,'${pvz.id}',${mIdx},'${field.key}')"
+      onblur="onBlurSave()" />
+  </div>`;
+}
+
+function handleInput(input, pvzId, mIdx, key) {
+  const pvz = state.pvzList.find(p => p.id === pvzId);
+  if (!pvz) return;
+  if (!pvz.data[mIdx]) pvz.data[mIdx] = {};
+  const val = parseFloat(input.value) || 0;
+  pvz.data[mIdx][key] = val;
+  input.classList.toggle('has-val', val !== 0);
+  updateFormSummary(pvz, mIdx);
+}
+
+function onBlurSave() {
+  saveState();
+  updateHeader();
+  // Quietly refresh charts if overview was rendered
+  if (mainChartInst) {
+    const pvzList = state.pvzList;
+    mainChartInst.data.datasets.forEach((ds, i) => {
+      if (pvzList[i]) {
+        ds.data = state.months.map((_,mi) => calcMonthProfit(pvzList[i], mi));
+      }
+    });
+    mainChartInst.update('none');
+  }
+}
+
+function updateFormSummary(pvz, mIdx) {
+  const income = calcMonthIncome(pvz, mIdx);
+  const expense = calcMonthExpense(pvz, mIdx);
+  const profit = income - expense;
+  const si = document.getElementById('sum-income');
+  const se = document.getElementById('sum-expense');
+  const sp = document.getElementById('sum-profit');
+  if (si) si.textContent = fmtFull(income);
+  if (se) se.textContent = fmtFull(expense);
+  if (sp) {
+    sp.textContent = (profit >= 0 ? '+' : '') + fmtFull(profit);
+    sp.className = 's-val ' + numClass(profit);
+  }
+}
+
+function addCustomField(type) {
+  const pvz = getCurrentPvz();
+  if (!pvz) return;
+  const key = uid();
+  const fieldObj = { key, label: '' };
+  if (type === 'income') pvz.incomeFields.push(fieldObj);
+  else pvz.expenseFields.push(fieldObj);
+  saveState();
+
+  const container = document.getElementById(type === 'income' ? 'incomeCustom' : 'expenseCustom');
+  if (!container) return;
+  const mIdx = editorMonthIdx;
+  const div = document.createElement('div');
+  div.className = 'custom-field-row';
+  div.id = 'custom-' + key;
+  div.innerHTML = `
+    <input type="text" placeholder="Название статьи" value=""
+      oninput="updateFieldLabel(this,'${pvz.id}','${key}','${type}')" />
+    <input type="number" placeholder="0"
+      oninput="handleInput(this,'${pvz.id}',${mIdx},'${key}')"
+      onblur="onBlurSave()" />
+    <button class="del-btn" onclick="removeField('${pvz.id}','${key}','${type}')">×</button>`;
+  container.appendChild(div);
+  div.querySelector('input[type=text]').focus();
+}
+
+function updateFieldLabel(input, pvzId, key, type) {
+  const pvz = state.pvzList.find(p => p.id === pvzId);
+  if (!pvz) return;
+  const fields = type === 'income' ? pvz.incomeFields : pvz.expenseFields;
+  const f = fields.find(f => f.key === key);
+  if (f) { f.label = input.value; saveState(); }
+}
+
+function removeField(pvzId, key, type) {
+  const pvz = state.pvzList.find(p => p.id === pvzId);
+  if (!pvz) return;
+  if (type === 'income') pvz.incomeFields = pvz.incomeFields.filter(f => f.key !== key);
+  else pvz.expenseFields = pvz.expenseFields.filter(f => f.key !== key);
+  // Also remove data for this key
+  Object.values(pvz.data).forEach(m => delete m[key]);
+  saveState();
+  const row = document.getElementById('custom-' + key) || document.getElementById('row-' + key);
+  if (row) row.remove();
+  updateFormSummary(pvz, editorMonthIdx);
+  toast('Строка удалена');
+}
+
+function clearMonthData(pvzId, mIdx) {
+  const pvz = state.pvzList.find(p => p.id === pvzId);
+  if (!pvz) return;
+  if (!confirm(`Очистить данные за ${state.months[mIdx]}?`)) return;
+  pvz.data[mIdx] = {};
+  saveState();
+  renderEntryForm();
+  toast('Данные периода очищены');
+}
+
+// ======================================================
+// PVZ MANAGEMENT
+// ======================================================
+
+let selectedColor = '#a855f7';
+
+document.getElementById('colorPicker').addEventListener('click', e => {
+  const cp = e.target.closest('.cpick');
+  if (!cp) return;
+  document.querySelectorAll('.cpick').forEach(c => c.classList.remove('sel'));
+  cp.classList.add('sel');
+  selectedColor = cp.dataset.color;
+});
+
+function addPvz() {
+  const name = document.getElementById('newPvzName').value.trim();
+  if (!name) { toast('Введите название', 'error'); return; }
+  const id = 'pvz_' + Date.now();
+  state.pvzList.push({
+    id, name, color: selectedColor,
+    incomeFields: JSON.parse(JSON.stringify(DEFAULT_INCOME_FIELDS)),
+    expenseFields: JSON.parse(JSON.stringify(DEFAULT_EXPENSE_FIELDS)),
+    data: {}
+  });
+  saveState();
+  editorPvzId = id;
+  closeModal('modalAddPvz');
+  document.getElementById('newPvzName').value = '';
+  toast(`Добавлен ПВЗ: ${name}`);
+  renderEditor();
+  renderOverview();
+}
+
+function confirmReset() {
+  if (!confirm('Сбросить ВСЕ данные и вернуть демо-состояние?')) return;
+  localStorage.removeItem('pvz_data_v3');
+  state = initDefaultState();
+  editorPvzId = state.pvzList[0].id;
+  editorMonthIdx = 0;
+  mainChartInst = null;
+  renderOverview();
+  renderEditor();
+  toast('Данные сброшены');
+}
+
+// ======================================================
+// MONTH MANAGEMENT
+// ======================================================
+
+function renderMonthsManage() {
+  const list = document.getElementById('monthsManageList');
+  list.innerHTML = state.months.map((m, i) =>
+    `<div class="month-manage-row">
+      <span class="m-name">${m}</span>
+      ${state.months.length > 1 ? `<button class="btn btn-danger btn-sm" onclick="removeMonth(${i})">Удалить</button>` : ''}
+    </div>`
+  ).join('');
+}
+
+function addMonth() {
+  const input = document.getElementById('newMonthName');
+  const name = input.value.trim();
+  if (!name) { toast('Введите название периода', 'error'); return; }
+  state.months.push(name);
+  saveState();
+  input.value = '';
+  renderMonthsManage();
+  toast(`Добавлен период: ${name}`);
+}
+
+function removeMonth(idx) {
+  if (state.months.length <= 1) { toast('Нельзя удалить последний период', 'error'); return; }
+  const name = state.months[idx];
+  if (!confirm(`Удалить период "${name}"? Все данные за него будут потеряны.`)) return;
+  state.months.splice(idx, 1);
+  // Re-index data
+  state.pvzList.forEach(pvz => {
+    const newData = {};
+    Object.entries(pvz.data).forEach(([k, v]) => {
+      const ki = parseInt(k);
+      if (ki < idx) newData[ki] = v;
+      else if (ki > idx) newData[ki - 1] = v;
+    });
+    pvz.data = newData;
+  });
+  saveState();
+  if (editorMonthIdx >= state.months.length) editorMonthIdx = state.months.length - 1;
+  renderMonthsManage();
+  renderEditorMonths();
+  toast(`Период "${name}" удалён`);
+}
+
+// ======================================================
+// MODALS
+// ======================================================
+
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+document.querySelectorAll('.modal-overlay').forEach(el => {
+  el.addEventListener('click', e => { if (e.target === el) closeModal(el.id); });
+});
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') document.querySelectorAll('.modal-overlay.open').forEach(el => closeModal(el.id));
+});
+
+// ======================================================
+// INIT
+// ======================================================
+
+renderOverview();
+</script>
+</body>
+</html>
