@@ -402,6 +402,7 @@ body{background:var(--bg);color:var(--tx);font:13px/1.5 system-ui,sans-serif;min
         <div id="ep-group-totals" style="font-size:11px;color:var(--mu)"></div>
       </div>
         <div style="display:flex;gap:8px">
+          <button class="cancel-ep" onclick="cancelAllEntries()" style="border-color:rgba(255,69,58,.3);color:var(--rd)" id="cancel-all-btn">Отменить внесённое</button>
           <button class="cancel-ep" onclick="hideEntry()">Отмена</button>
           <button class="save-all" id="save-all-btn" onclick="saveAll()">Сохранить всё</button>
         </div>
@@ -425,8 +426,9 @@ const CATS=[
   {v:'AV_yandex',l:'АВ Яндекс',type:'income',mp:'yandex'},
   {v:'AV_ozon',l:'АВ Озон',type:'income',mp:'ozon'},
   {v:'AV_wb',l:'АВ WB',type:'income',mp:'wb'},
-  {v:'YMVmeste',l:'ЯМаркет Вместе',type:'income',mp:'yandex'},
-  {v:'SimaLand',l:'SimaLand',type:'income'},
+  {v:'YMVmeste',l:'ЯМаркет Вместе',type:'income',addresses:['Ладо Кецховели 37','Яковлева 46','Северная 9','Ольховая 2а','Сопочная 36']},
+  {v:'YandexEda',l:'Яндекс Еда',type:'income',mp:'yandex',perOperation:true},
+  {v:'SimaLand',l:'SimaLand',type:'income',addresses:['Ладо Кецховели 37','Калинина 181']},
   {v:'ChemClean',l:'Химчистка',type:'income',commission:0.12},
   {v:'BeriZaryad',l:'Бери заряд',type:'income'},
   {v:'Print',l:'Пункт Печати',type:'income',taxExempt:true},
@@ -751,9 +753,9 @@ function renderMultiMonthView(v, n){
   const totalNets=months.map((_,i)=>v.reduce((s,p)=>{
     const mi=allInc.filter(e=>e.point_id===p.id&&e._month===months[i].month&&e._year===months[i].year);
     const mx=allExp.filter(e=>e.point_id===p.id&&e._month===months[i].month&&e._year===months[i].year);
-    const iM=mi.reduce((a,e)=>a+Number(e.amount),0)*p.my_share;
-    const xM=mx.reduce((a,e)=>a+Number(e.amount),0)*p.my_share;
-    const tb=mi.filter(e=>!e.tax_exempt).reduce((a,e)=>a+Number(e.amount)*p.my_share,0);
+    const iM=mi.reduce((a,e)=>a+Number(e.amount),0);
+    const xM=mx.reduce((a,e)=>a+Number(e.amount),0);
+    const tb=mi.filter(e=>!e.tax_exempt).reduce((a,e)=>a+Number(e.amount),0);
     return s+iM-xM-tb*p.tax_rate;
   },0));
   const grandNet=totalNets.reduce((s,n)=>s+n,0);
@@ -1199,9 +1201,9 @@ function renderFullTable(v){
       ${ms.map(m=>{
         const rows2=gpts2.map(p=>{
           const rd=buildPointTableData(p);
-          const ptI=CATS.filter(c=>c.type==='income').reduce((s,c)=>s+(rd[c.v]?.[m]||0)*p.my_share,0);
-          const ptE=CATS.filter(c=>c.type==='expense').reduce((s,c)=>s+(rd[c.v]?.[m]||0)*p.my_share,0);
-          const taxB=CATS.filter(c=>c.type==='income'&&!c.taxExempt).reduce((s,c)=>s+(rd[c.v]?.[m]||0)*p.my_share,0);
+          const ptI=CATS.filter(c=>c.type==='income').reduce((s,c)=>s+(rd[c.v]?.[m]||0),0);
+          const ptE=CATS.filter(c=>c.type==='expense').reduce((s,c)=>s+(rd[c.v]?.[m]||0),0);
+          const taxB=CATS.filter(c=>c.type==='income'&&!c.taxExempt).reduce((s,c)=>s+(rd[c.v]?.[m]||0),0);
           return ptI-ptE-taxB*p.tax_rate;
         });
         const t=rows2.reduce((s,n)=>s+n,0);
@@ -1383,8 +1385,9 @@ function selCatFn(v){
 }
 function ptsForCat(v){
   const c=CATS.find(x=>x.v===v);
-  const base=arch?pts:pts.filter(p=>!p.is_archived);
-  if(c&&c.mp)return base.filter(p=>p.marketplace===c.mp);
+  let base=arch?pts:pts.filter(p=>!p.is_archived);
+  if(c&&c.mp)base=base.filter(p=>p.marketplace===c.mp);
+  if(c&&c.addresses)base=base.filter(p=>c.addresses.includes(p.address));
   return base;
 }
 function buildEntryTbl(){
@@ -1394,12 +1397,14 @@ function buildEntryTbl(){
   const isComm=!!cat.commission;
   const commPct=cat.commission||1;
   const isExp=cat.type==='expense';
+  const isPerOp=!!cat.perOperation;
 
   // Уже внесённые данные за текущий месяц
-  const existing={}, existingDates={};
+  const existing={}, existingDates={}, existingNotes={};
   (isExp?exp:inc).filter(e=>e.category===selCat).forEach(e=>{
     existing[e.point_id]=(existing[e.point_id]||0)+Number(e.amount);
     existingDates[e.point_id]=e.entry_date||today;
+    existingNotes[e.point_id]=e.notes||'';
   });
   const firstDate=Object.values(existingDates)[0]||today;
   const allFilled = rel.length>0 && rel.every(p=>existing[p.id]!==undefined);
@@ -1414,10 +1419,14 @@ function buildEntryTbl(){
     ${cat.custom?'<th>Название</th>':''}
     ${isComm
       ? `<th style="text-align:right">Оборот клиента ₽</th>
-         <th style="text-align:right;color:var(--am)">Комиссия ${(commPct*100).toFixed(0)}%</th>`
-      : `<th style="text-align:right">Сумма ₽</th>`}
+         <th style="text-align:right;color:var(--am)">Вознаграждение ${(commPct*100).toFixed(0)}%</th>`
+      : isPerOp
+      ? `<th style="text-align:right">₽ за операцию</th>
+         <th style="text-align:right;color:var(--am)">Кол-во операций</th>
+         <th style="text-align:right;color:var(--bl)">Полная сумма</th>`
+      : `<th style="text-align:right">Полная сумма ₽</th>`}
     <th style="text-align:right">Моя доля</th>
-    ${isComm?'<th style="text-align:right;color:var(--mu)">После налога</th>':''}
+    ${(cat.type==='income'&&!cat.taxExempt)?'<th style="text-align:right;color:var(--mu)">После налога</th>':''}
     ${cat.taxExempt?'<th>б/н</th>':''}
     <th style="text-align:center;color:var(--mu)">Статус</th>
   </tr></thead><tbody>`;
@@ -1425,9 +1434,19 @@ function buildEntryTbl(){
   rel.forEach(p=>{
     const hasData=existing[p.id]!==undefined;
     const existVal=existing[p.id]||0;
-    const displayVal=isComm&&hasData
-      ? Math.round(existVal/(commPct*p.my_share))
-      : (hasData?Math.round(existVal):'');
+    // Для perOperation — восстанавливаем цену за операцию и количество из notes (формат "perop:ЦЕНА:КОЛ-ВО")
+    let perOpPrice='', perOpQty='';
+    if(isPerOp&&hasData){
+      const note=existingNotes[p.id]||'';
+      const m2=note.match(/^perop:([\d.]+):(\d+)/);
+      if(m2){perOpPrice=m2[1];perOpQty=m2[2];}
+    }
+    // existVal — сохранённая МОЯ доля. Показываем пользователю обратно ПОЛНУЮ сумму,
+    // которую он вводил (полная * комиссия * доля = existVal → полная = existVal / (комиссия*доля))
+    const divisor=commPct*p.my_share;
+    const displayVal=hasData&&divisor&&!isPerOp
+      ? Math.round(existVal/divisor)
+      : '';
 
     h+=`<tr>
       <td><div class="pi"><span class="mt ${mpc(p.marketplace)}">${p.marketplace.toUpperCase()}</span><span class="pa">${p.address}</span></div></td>
@@ -1436,12 +1455,19 @@ function buildEntryTbl(){
       ${isComm
         ?`<td style="text-align:right"><input class="amt-inp" type="number" min="0" step="0.01" placeholder="—" id="amt-${p.id}" oninput="updEpTotal()" data-share="${p.my_share}" data-comm="${commPct}" value="${displayVal}"/></td>
           <td style="text-align:right"><span class="share-hint" id="comm-${p.id}" style="color:var(--am)">—</span></td>`
+        : isPerOp
+        ?`<td style="text-align:right"><input class="perop-price" type="number" min="0" step="0.01" placeholder="—" id="price-${p.id}" oninput="updEpTotal()" value="${perOpPrice}" style="width:80px;background:var(--bg4);border:1px solid var(--b2);border-radius:7px;color:var(--tx);font-family:monospace;font-size:12px;padding:5px 8px;outline:none;text-align:right"/></td>
+          <td style="text-align:right"><input class="perop-qty" type="number" min="0" step="1" placeholder="—" id="qty-${p.id}" oninput="updEpTotal()" value="${perOpQty}" style="width:70px;background:var(--bg4);border:1px solid var(--b2);border-radius:7px;color:var(--tx);font-family:monospace;font-size:12px;padding:5px 8px;outline:none;text-align:right"/></td>
+          <td style="text-align:right"><span class="share-hint" id="perop-tot-${p.id}" style="color:var(--bl)">—</span>
+            <input type="hidden" class="amt-inp" id="amt-${p.id}" data-share="${p.my_share}" data-comm="1" data-perop="1" value=""/></td>`
         :`<td style="text-align:right"><input class="amt-inp" type="number" min="0" step="0.01" placeholder="—" id="amt-${p.id}" oninput="updEpTotal()" data-share="${p.my_share}" data-comm="1" value="${displayVal}"/></td>`
       }
       <td class="share-hint" id="my-${p.id}">—</td>
-      ${isComm?`<td class="share-hint" id="net-${p.id}" style="color:var(--mu)">—</td>`:''}
+      ${(cat.type==='income'&&!cat.taxExempt)?`<td class="share-hint" id="net-${p.id}" style="color:var(--mu)">—</td>`:''}
       ${cat.taxExempt?`<td><label style="display:flex;align-items:center;gap:4px;font-size:12px;color:var(--mu);cursor:pointer"><input type="checkbox" id="tx-${p.id}" checked style="accent-color:var(--gr)"> б/н</label></td>`:''}
-      <td style="text-align:center;font-size:11px">${hasData?'<span style="color:var(--gr)">✓ внесено</span>':'<span style="color:var(--mu2)">—</span>'}</td>
+      <td style="text-align:center;font-size:11px">${hasData
+        ?`<span style="color:var(--gr);margin-right:6px">✓ внесено</span><button onclick="cancelEntry('${p.id}')" title="Отменить внесение" style="background:none;border:1px solid var(--b2);border-radius:5px;color:var(--rd);font-size:10px;padding:2px 7px;cursor:pointer">✕</button>`
+        :'<span style="color:var(--mu2)">—</span>'}</td>
     </tr>`;
   });
 
@@ -1453,7 +1479,68 @@ function buildEntryTbl(){
   document.getElementById('ep-foot').style.display='flex';
   updEpTotal();
 }
+
+// Отменяет (удаляет) все внесённые записи категории selCat за текущий месяц по всем пунктам
+async function cancelAllEntries(){
+  const cat=CATS.find(c=>c.v===selCat);if(!cat){alert('Выберите категорию');return}
+  const rel=ptsForCat(selCat);
+  const pids=rel.map(p=>p.id);
+  if(!confirm('Отменить ВСЕ внесённые данные по категории «'+cat.l+'» за этот месяц для всех пунктов?'))return;
+  const btn=document.getElementById('cancel-all-btn');
+  btn.disabled=true;
+  try{
+    if(cat.type==='income'){
+      await db.from('income_entries').delete().eq('month_id',mid).eq('category',selCat).in('point_id',pids);
+    }else{
+      await db.from('expense_entries').delete().eq('month_id',mid).eq('category',selCat).in('point_id',pids);
+    }
+    toast('✓ Все записи отменены');
+    await refreshAllData();
+    buildCatGrid();
+    buildEntryTbl();
+    drawDash();
+  }catch(e){
+    alert('Ошибка отмены: '+e.message);
+  }finally{
+    btn.disabled=false;
+  }
+}
+
+// Отменяет (удаляет) внесённую запись категории selCat за текущий месяц для одного пункта
+async function cancelEntry(pointId){
+  const cat=CATS.find(c=>c.v===selCat);if(!cat)return;
+  if(!confirm('Отменить внесённые данные по этому пункту за этот месяц?'))return;
+  try{
+    if(cat.type==='income'){
+      await db.from('income_entries').delete().eq('month_id',mid).eq('category',selCat).eq('point_id',pointId);
+    }else{
+      await db.from('expense_entries').delete().eq('month_id',mid).eq('category',selCat).eq('point_id',pointId);
+    }
+    toast('✓ Внесение отменено');
+    await refreshAllData();
+    buildCatGrid();
+    buildEntryTbl();
+    drawDash();
+  }catch(e){
+    alert('Ошибка отмены: '+e.message);
+  }
+}
 function updEpTotal(){
+  // Для категорий "за операцию" (напр. Яндекс Еда) — считаем полную сумму = цена * кол-во
+  // и записываем в скрытый input.amt-, чтобы остальная логика (доля/налог/группы) сработала как обычно.
+  document.querySelectorAll('.amt-inp[data-perop="1"]').forEach(hiddenInp=>{
+    const pid=hiddenInp.id.replace('amt-','');
+    const priceEl=document.getElementById('price-'+pid);
+    const qtyEl=document.getElementById('qty-'+pid);
+    const price=parseFloat(priceEl?.value)||0;
+    const qty=parseFloat(qtyEl?.value)||0;
+    const bothFilled=priceEl?.value!==''&&qtyEl?.value!=='';
+    const fullSum=price*qty;
+    hiddenInp.value=bothFilled?fullSum:'';
+    const totEl=document.getElementById('perop-tot-'+pid);
+    if(totEl)totEl.textContent=bothFilled?fmt(fullSum):'—';
+  });
+
   let tot=0;
   document.querySelectorAll('.amt-inp').forEach(inp=>{
     const filled=inp.value!=='';
@@ -1513,9 +1600,19 @@ async function saveAll(){
     const lbl=document.getElementById('lbl-'+p.id)?.value||CL[selCat]||selCat;
     const tex=document.getElementById('tx-'+p.id)?.checked||cat.taxExempt||false;
     const commPct=cat.commission||1;
-    // Сохраняем: оборот * комиссия * доля = моя сумма (0 — тоже допустимое значение)
-    const amt=rawAmt*commPct*p.my_share;
-    rows.push({p,amt,dat,lbl,tex});
+    const inpEl=document.getElementById('amt-'+p.id);
+    const effShare=parseFloat(inpEl?.dataset.share)||1; // доля пункта — пользователь вводит ПОЛНУЮ сумму по точке
+    // Полная сумма * комиссия (если есть) * доля пункта = моя доля для сохранения в базу
+    const amt=rawAmt*commPct*effShare;
+    let notes='';
+    if(cat.commission){
+      notes=`оборот: ${Math.round(amt/(p.my_share*(cat.commission||1)))}`;
+    }else if(cat.perOperation){
+      const priceEl=document.getElementById('price-'+p.id);
+      const qtyEl=document.getElementById('qty-'+p.id);
+      notes=`perop:${priceEl?.value||0}:${qtyEl?.value||0}`;
+    }
+    rows.push({p,amt,dat,lbl,tex,notes});
   }
   if(!rows.length){toast('Нет сумм для сохранения');btn.disabled=false;btn.textContent='Сохранить всё';return}
   try{
@@ -1523,7 +1620,7 @@ async function saveAll(){
     const pids=rows.map(r=>r.p.id);
     if(cat.type==='income'){
       await db.from('income_entries').delete().eq('month_id',mid).eq('category',selCat).in('point_id',pids);
-      await db.from('income_entries').insert(rows.map(r=>({point_id:r.p.id,month_id:mid,category:selCat,label:r.lbl,amount:r.amt,entry_date:r.dat,tax_exempt:r.tex,notes:cat.commission?`оборот: ${Math.round(r.amt/(r.p.my_share*(cat.commission||1)))}`:'' })));
+      await db.from('income_entries').insert(rows.map(r=>({point_id:r.p.id,month_id:mid,category:selCat,label:r.lbl,amount:r.amt,entry_date:r.dat,tax_exempt:r.tex,notes:r.notes})));
     }else{
       await db.from('expense_entries').delete().eq('month_id',mid).eq('category',selCat).in('point_id',pids);
       await db.from('expense_entries').insert(rows.map(r=>({point_id:r.p.id,month_id:mid,category:selCat,label:CL[selCat]||selCat,amount:r.amt,entry_date:r.dat,notes:''})));
