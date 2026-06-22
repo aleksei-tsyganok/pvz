@@ -12,8 +12,8 @@
   --bg:#111214;--bg2:#18191c;--bg3:#1f2023;--bg4:#26272b;
   --b:rgba(255,255,255,.055);--b2:rgba(255,255,255,.1);
   --tx:#d4d2cc;--mu:#6a6864;--mu2:#3e3c3a;
-  --gr:#34c759;--rd:#ff453a;--am:#ff9f0a;--bl:#0a84ff;--pu:#bf5af2;
-  --grp-a:#bf5af2;--grp-ad:#64d2ff;--grp-ym:#ffd60a;
+  --gr:#2a9d4e;--rd:#c0392b;--am:#d4820a;--bl:#1a6fb5;--pu:#bf5af2;
+  --grp-a:#8e44c7;--grp-ad:#3a9fbf;--grp-ym:#b8960a;
   --gr-soft:rgba(52,199,89,.18);--rd-soft:rgba(255,69,58,.15);
   --am-soft:rgba(255,159,10,.15);
 }
@@ -42,14 +42,14 @@ body{background:var(--bg);color:var(--tx);font:13px/1.5 system-ui,sans-serif;min
 .tab:hover{color:var(--tx)}.tab.on{color:var(--tx);border-bottom-color:var(--gr)}
 .dot{display:inline-block;width:6px;height:6px;border-radius:50%;margin-right:5px;vertical-align:middle}
 
-.cnt{padding:16px;flex:1}
+.cnt{padding:12px 14px;flex:1}
 
 /* SUMMARY STRIP */
 .sum4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px}
 @media(max-width:600px){.sum4{grid-template-columns:1fr 1fr}}
-.sc{background:var(--bg2);border:1px solid var(--b);border-radius:12px;padding:14px 16px}
-.sc-l{font-size:10px;color:var(--mu);letter-spacing:.01em;margin-bottom:4px;font-weight:400}
-.sc-v{font-size:17px;font-weight:600;font-family:-apple-system,BlinkMacSystemFont,"SF Mono","Fira Mono",monospace}
+.sc{background:var(--bg2);border:1px solid var(--b);border-radius:10px;padding:11px 14px}
+.sc-l{font-size:10px;color:var(--mu);margin-bottom:2px;font-weight:400}
+.sc-v{font-size:15px;font-weight:600}
 
 /* YEAR TOGGLE */
 .view-sw{display:flex;gap:4px;margin-bottom:16px}
@@ -75,26 +75,26 @@ body{background:var(--bg);color:var(--tx);font:13px/1.5 system-ui,sans-serif;min
 .zero{color:var(--mu2)}
 
 /* GROUP / POINT */
-.gb{margin-bottom:20px}
-.gh{display:flex;align-items:center;gap:8px;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--b)}
+.gb{margin-bottom:14px}
+.gh{display:flex;align-items:center;gap:6px;margin-bottom:6px;padding-bottom:6px;border-bottom:1px solid var(--b)}
 .gbadge{font-size:10px;font-weight:700;padding:2px 9px;border-radius:100px;letter-spacing:.04em}
 .bA{background:rgba(191,90,242,.15);color:var(--grp-a)}.bAD{background:rgba(100,210,255,.15);color:var(--grp-ad)}.bYM{background:rgba(255,214,10,.15);color:var(--grp-ym)}
 .gn{font-size:12px;color:var(--mu)}.gs1{flex:1}
-.gst{font-size:12px;font-family:monospace;color:var(--mu)}
+.gst{font-size:12px;color:var(--mu)}
 
 /* POINT CARD */
-.ptw{background:var(--bg2);border:1px solid var(--b);border-radius:12px;overflow:hidden;margin-bottom:10px}
-.pth{display:grid;grid-template-columns:1fr 88px 88px 88px 84px 18px;padding:7px 14px;background:var(--bg3);border-bottom:1px solid var(--b)}
+.ptw{background:var(--bg2);border:1px solid var(--b);border-radius:10px;overflow:hidden;margin-bottom:6px}
+.pth{display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr 20px;padding:6px 14px;background:var(--bg3);border-bottom:1px solid var(--b)}
 .pth span{font-size:10px;font-weight:600;color:var(--mu);text-transform:uppercase;letter-spacing:.05em}
 .pth span:not(:first-child){text-align:right}
 .pr{border-bottom:1px solid var(--b)}.pr:last-child{border-bottom:none}
-.pm{display:grid;grid-template-columns:1fr 88px 88px 88px 84px 18px;align-items:center;padding:10px 14px;cursor:pointer;transition:background .1s}
+.pm{display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr 20px;align-items:center;padding:8px 14px;cursor:pointer;transition:background .1s}
 .pm:hover{background:rgba(255,255,255,.02)}
 .pi{display:flex;align-items:center;gap:7px}
 .mt{font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px}
 .my{background:rgba(245,158,11,.18);color:var(--am)}.mo{background:rgba(96,165,250,.18);color:var(--bl)}.mw{background:rgba(167,139,250,.18);color:var(--pu)}
 .pa{font-size:13px;font-weight:500}
-.pn{font-family:monospace;font-size:13px;text-align:right}
+.pn{font-family:inherit;font-size:13px;text-align:right}
 .xi{color:var(--mu);font-size:11px;text-align:right}
 
 /* POINT DETAIL */
@@ -103,7 +103,7 @@ body{background:var(--bg);color:var(--tx);font:13px/1.5 system-ui,sans-serif;min
 .pd-top{display:flex;gap:12px;padding:10px 14px;background:var(--bg3);border-bottom:1px solid var(--b);flex-wrap:wrap;align-items:center}
 .di{display:flex;flex-direction:column;gap:1px}
 .di-l{font-size:10px;color:var(--mu);text-transform:uppercase;letter-spacing:.04em}
-.di-v{font-size:13px;font-weight:600;font-family:monospace}
+.di-v{font-size:13px;font-weight:600}
 .arch-rb{font-size:11px;color:var(--mu2);cursor:pointer;padding:3px 8px;border:1px solid transparent;border-radius:5px;background:none;margin-left:auto}
 .arch-rb:hover{border-color:var(--b);color:var(--mu)}
 
@@ -117,7 +117,7 @@ body{background:var(--bg);color:var(--tx);font:13px/1.5 system-ui,sans-serif;min
 .sub-row:last-child{border-bottom:none}
 .sub-lbl{font-size:12px;color:var(--mu)}
 .sub-vals{display:flex;gap:10px;align-items:baseline}
-.sub-full{font-family:monospace;font-size:12px;color:var(--tx)}
+.sub-full{font-family:inherit;font-size:12px;color:var(--tx)}
 .sub-my{font-family:monospace;font-size:11px;color:var(--mu)}
 
 /* ADD SECTION */
@@ -148,13 +148,16 @@ body{background:var(--bg);color:var(--tx);font:13px/1.5 system-ui,sans-serif;min
 .modal-body{overflow-y:auto;flex:1}
 .ep-step{padding:14px 20px;border-bottom:1px solid var(--b)}
 .ep-lbl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--mu);margin-bottom:8px}
-.cat-grid{display:flex;flex-wrap:wrap;gap:5px}
+.cat-grid{display:flex;flex-wrap:wrap;gap:8px}
 .cat-section-lbl{font-size:10px;color:var(--mu);text-transform:uppercase;letter-spacing:.06em;width:100%;margin-top:8px;margin-bottom:4px}
 .cat-section-lbl:first-child{margin-top:0}
-.cat-btn{padding:6px 12px;border-radius:7px;border:1px solid var(--b2);background:none;color:var(--tx);font-size:12px;cursor:pointer;transition:all .15s}
+.cat-tab.on{background:var(--bg3)!important;color:var(--tx)!important;border-color:var(--b2)!important}
+.cat-tab:hover{background:var(--bg3);color:var(--tx)}
+.cat-btn{padding:10px 16px;border-radius:9px;border:1px solid var(--b2);background:none;color:var(--tx);font-size:13px;cursor:pointer;transition:all .15s}
 .cat-btn:hover{background:var(--bg3)}.cat-btn.on{background:var(--bg3);border-color:var(--gr);color:var(--gr)}
-.cat-btn.filled{border-color:rgba(52,199,89,.35);background:rgba(52,199,89,.06)}
+.cat-btn.filled{border-color:rgba(42,157,78,.5);background:rgba(42,157,78,.08)}
 .cat-btn.filled.on{border-color:var(--gr);background:var(--bg3);color:var(--gr)}
+.cat-btn.partial{border-color:rgba(212,130,10,.4);background:rgba(212,130,10,.06)}
 .cat-check{color:var(--gr);font-weight:700}
 .entry-tbl{width:100%;border-collapse:collapse;font-size:12px}
 .entry-tbl th{text-align:left;font-size:9px;font-weight:600;color:var(--mu);text-transform:uppercase;letter-spacing:.04em;padding:6px 8px;border-bottom:1px solid var(--b);background:var(--bg3);white-space:nowrap}
@@ -162,7 +165,7 @@ body{background:var(--bg);color:var(--tx);font:13px/1.5 system-ui,sans-serif;min
 .entry-tbl td{padding:6px 8px;border-bottom:1px solid var(--b);vertical-align:middle}
 .entry-tbl tr:last-child td{border-bottom:none}
 .entry-tbl tr:hover td{background:rgba(255,255,255,.015)}
-.amt-inp{width:90px;background:var(--bg4);border:1px solid var(--b2);border-radius:7px;color:var(--tx);font-family:monospace;font-size:12px;padding:5px 8px;outline:none;text-align:right;transition:border-color .15s}
+.amt-inp{width:90px;background:var(--bg4);border:1px solid var(--b2);border-radius:7px;color:var(--tx);font-family:inherit;font-size:12px;padding:5px 8px;outline:none;text-align:right;transition:border-color .15s}
 .amt-inp:focus{border-color:var(--gr)}
 .dat-inp{background:var(--bg4);border:1px solid var(--b2);border-radius:7px;color:var(--mu);font-size:11px;padding:4px 6px;outline:none;width:100px;transition:border-color .15s}
 .dat-inp:focus{border-color:var(--gr)}
@@ -324,7 +327,7 @@ body{background:var(--bg);color:var(--tx);font:13px/1.5 system-ui,sans-serif;min
 .ftbl .frow-grand td:first-child{background:transparent !important;padding-left:16px;}
 
 /* VALUE CLASSES */
-.fv{font-family:-apple-system,BlinkMacSystemFont,'SF Mono','Fira Mono',monospace;font-size:11.5px;}
+.fv{font-family:-apple-system,BlinkMacSystemFont,system-ui,sans-serif;font-size:11.5px;}
 .fv.profit-pos{color:var(--gr)}
 .fv.profit-neg{color:var(--rd)}
 .fv.income-v{color:var(--tx)}
@@ -337,7 +340,7 @@ body{background:var(--bg);color:var(--tx);font:13px/1.5 system-ui,sans-serif;min
 .cell-inp{
   width:72px;background:transparent;border:none;
   color:var(--mu);
-  font-family:-apple-system,BlinkMacSystemFont,'SF Mono','Fira Mono',monospace;
+  font-family:-apple-system,BlinkMacSystemFont,system-ui,sans-serif;
   font-size:11.5px;text-align:right;outline:none;padding:0;cursor:text;
   display:block;margin-left:auto;
 }
@@ -348,6 +351,13 @@ body{background:var(--bg);color:var(--tx);font:13px/1.5 system-ui,sans-serif;min
 }
 .cell-inp.income-v{color:var(--tx)}
 .cell-inp.correction{color:var(--am)}
+
+.period-nav{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.period-lbl{font-size:13px;font-weight:600;color:var(--tx);min-width:160px;text-align:center}
+.pnav-btn{background:var(--bg3);border:1px solid var(--b);border-radius:7px;color:var(--tx);width:28px;height:28px;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.pnav-btn:hover{border-color:var(--b2)}
+/* alltime и table — скрываем стрелки */
+.pnav-btn.hidden{visibility:hidden}
 
 /* ════════════════════════════════════════════════════════════
    МОБИЛЬНАЯ АДАПТАЦИЯ (≤640px)
@@ -481,13 +491,11 @@ body{background:var(--bg);color:var(--tx);font:13px/1.5 system-ui,sans-serif;min
   <div class="tb">
     <div class="logo">ПВЗ <b>•</b> Финансы</div>
     <div class="sep"></div>
-    <div class="pnav">
-      <button onclick="shiftM(-1)">‹</button>
-      <div class="plbl" id="plbl"></div>
-      <button onclick="shiftM(1)">›</button>
-    </div>
-    <button class="tbtn green" id="entry-btn" onclick="showEntry()">+ Внести данные</button>
+    <div id="plbl" style="display:none"></div>
+    <button class="tbtn green" onclick="showEntry('income')">+ Доходы</button>
+    <button class="tbtn" style="border-color:rgba(255,69,58,.4);color:var(--rd)" onclick="showEntry('expense')">− Расходы</button>
     <button class="tbtn" id="arch-btn" onclick="toggleArch()">📦 Архив</button>
+    <button class="tbtn" onclick="openSettings()" title="Настройки">⚙️</button>
   </div>
   <div class="tabs">
     <div class="tab on" data-t="all" onclick="swTab('all')">Все</div>
@@ -499,16 +507,40 @@ body{background:var(--bg);color:var(--tx);font:13px/1.5 system-ui,sans-serif;min
   <!-- DASH -->
   <div class="cnt" id="dash"></div>
 
+  <!-- MODAL SETTINGS -->
+  <div class="modal-ov" id="settings-modal" onclick="onSettingsOverlay(event)">
+    <div class="modal-box" style="max-width:680px">
+      <div class="modal-head">
+        <h2>Настройки пунктов</h2>
+        <button class="modal-close" onclick="closeSettings()">×</button>
+      </div>
+      <div class="modal-body" id="settings-body" style="padding:16px 20px"></div>
+      <div class="modal-foot">
+        <div style="font-size:12px;color:var(--mu)">Изменения применяются сразу при сохранении</div>
+        <div style="display:flex;gap:8px">
+          <button class="cancel-ep" onclick="closeSettings()">Закрыть</button>
+          <button class="save-all" onclick="saveSettings()">Сохранить</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- MODAL ENTRY -->
   <div class="modal-ov" id="entry-modal" onclick="onOverlayClick(event)">
     <div class="modal-box">
       <div class="modal-head">
-        <h2 id="modal-title">Внести данные — <span id="modal-period" style="color:var(--mu);font-weight:400"></span></h2>
+        <h2 id="modal-title" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          Внести данные
+          <div style="display:flex;align-items:center;gap:6px">
+            <button onclick="shiftEntryM(-1)" style="background:var(--bg3);border:1px solid var(--b);border-radius:6px;color:var(--tx);width:24px;height:24px;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center">‹</button>
+            <span id="modal-period" style="color:var(--mu);font-weight:400;font-size:13px;min-width:90px;text-align:center"></span>
+            <button onclick="shiftEntryM(1)" style="background:var(--bg3);border:1px solid var(--b);border-radius:6px;color:var(--tx);width:24px;height:24px;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center">›</button>
+          </div>
+        </h2>
         <button class="modal-close" onclick="hideEntry()">×</button>
       </div>
       <div class="modal-body">
         <div class="ep-step">
-          <div class="ep-lbl">Выберите категорию</div>
           <div class="cat-grid" id="cat-grid"></div>
         </div>
         <div id="entry-date-wrap" style="display:none;padding:10px 20px 0;display:none">
@@ -539,10 +571,18 @@ const SB_URL='https://ehvqhjqwacktahxvdbqb.supabase.co';
 const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVodnFoanF3YWNrdGFoeHZkYnFiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1MzA3NzYsImV4cCI6MjA5NzEwNjc3Nn0.AV6F0whruHs7n0oI4PaS7ncJ4af9lhpz7Z9wsp2KAVQ';
 
 let db,pts=[],inc=[],exp=[],allInc=[],allExp=[];
-let Y=new Date().getFullYear(),M=new Date().getMonth()+1;
+// Месяц для внесения данных — по умолчанию текущий
+let entryM=new Date().getMonth()+1;
+let entryY=new Date().getFullYear();
+
+// По умолчанию — прошлый месяц
+const _now=new Date();
+let M=_now.getMonth(); // getMonth() возвращает 0-11, т.е. getMonth()=0 это январь, нам нужен предыдущий
+let Y=_now.getFullYear();
+if(M<1){M=12;Y--;} // если январь — прошлый месяц декабрь прошлого года
 let tab='all',arch=false,mid=null,open=null,selCat=null;
 let addState={};
-let dashView='month'; // 'month' | '3m' | '6m' | 'year' | 'table'
+let dashView='home'; // 'home' | 'month' | '3m' | '6m' | 'year' | 'table'
 
 const MN=['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
 const CATS=[
@@ -582,8 +622,9 @@ window.addEventListener('DOMContentLoaded',async()=>{
     document.getElementById('boot').style.display='none';
     document.getElementById('app').style.display='flex';
     updLbl();
+    await loadAllMonths();
     await load();
-    drawDash();
+    await drawDash();
     buildCatGrid();
   }catch(e){
     document.getElementById('boot').innerHTML=`<div style="color:var(--rd);text-align:center;padding:32px">Ошибка: ${e.message}<br><small style="color:var(--mu)">Отключите RLS в Supabase SQL Editor</small></div>`;
@@ -593,7 +634,10 @@ window.addEventListener('DOMContentLoaded',async()=>{
 // Перезагружает данные актуальные для текущего вида (month/3m/6m/year/alltime/table)
 async function refreshAllData(){
   await load(); // всегда обновляем inc/exp текущего месяца (используется видом 'month')
-  if(dashView==='year'){
+  if(dashView==='home'){
+    document.getElementById('dash').innerHTML='<div style="padding:40px;text-align:center;color:var(--mu)">Загрузка...</div>';
+    await loadAllMonths();
+  } else if(dashView==='year'){
     await loadYear();
   } else if(dashView==='3m'||dashView==='6m'){
     await loadRange(getRangeMonths(dashView==='3m'?3:6));
@@ -609,7 +653,7 @@ async function load(){
   ]);
   pts=p||[];
   if(m){mid=m.id}else{
-    const {data:ins,error:ie}=await db.from('months').insert({year:Y,month:M}).select('id').single();
+    const {data:ins,error:ie}=await db.from('months').insert({year:entryY,month:entryM}).select('id').single();
     if(ie)throw ie;
     mid=ins.id;
   }
@@ -655,7 +699,7 @@ async function loadAllMonths(){
 }
 
 async function loadYear(){
-  const months=Array.from({length:12},(_,i)=>({year:Y,month:i+1}));
+  const months=getRangeMonths(12); // 12 месяцев заканчивающихся текущим M/Y
   await loadRange(months);
 }
 
@@ -672,8 +716,10 @@ function getRangeMonths(n){
 
 // ── CALCS ────────────────────────────────────────────────────
 function ps(p,iData,xData){
-  const i=iData.filter(e=>e.point_id===p.id),x=xData.filter(e=>e.point_id===p.id);
-  // amount в базе = уже моя доля, НЕ умножаем на my_share
+  const allowed=ptCatSettings[p.id]; // undefined = показываем всё
+  // Фильтруем доходы по настройкам (только доп. категории, базовые АВ не трогаем)
+  const i=iData.filter(e=>e.point_id===p.id&&(allowed===undefined||BASE_CATS.includes(e.category)||allowed.includes(e.category)));
+  const x=xData.filter(e=>e.point_id===p.id);
   const iM=i.reduce((s,e)=>s+Number(e.amount),0);
   const xM=x.reduce((s,e)=>s+Number(e.amount),0);
   const tb=i.filter(e=>!e.tax_exempt).reduce((s,e)=>s+Number(e.amount),0);
@@ -702,41 +748,60 @@ function expByCat(rows){
 }
 
 // ── DASHBOARD ─────────────────────────────────────────────────
-function drawDash(){
+async function drawDash(){
   const v=vp();
-  const tI=v.reduce((s,p)=>s+ps(p,inc,exp).iM,0);
-  const tX=v.reduce((s,p)=>s+ps(p,inc,exp).xM,0);
-  const tT=v.reduce((s,p)=>s+ps(p,inc,exp).tax,0);
-  const tN=v.reduce((s,p)=>s+ps(p,inc,exp).net,0);
+  // Для таблицы и alltime — считаем из allInc/allExp (все данные)
+  // Для остальных видов — из inc/exp (текущий период)
+  const _useAll=dashView==='table';
+  const _inc=_useAll?allInc:inc;
+  const _exp=_useAll?allExp:exp;
+  const tI=v.reduce((s,p)=>s+ps(p,_inc,_exp).iM,0);
+  const tX=v.reduce((s,p)=>s+ps(p,_inc,_exp).xM,0);
+  const tT=v.reduce((s,p)=>s+ps(p,_inc,_exp).tax,0);
+  const tN=v.reduce((s,p)=>s+ps(p,_inc,_exp).net,0);
+
+  // Лейбл текущего периода
+  const _pLabels={'month':MN[M-1]+' '+Y,'3m':'3 мес. до '+MN[M-1].slice(0,3)+' '+Y,'6m':'6 мес. до '+MN[M-1].slice(0,3)+' '+Y,'year':'12 мес. до '+MN[M-1].slice(0,3)+' '+Y,'alltime':'Всё время','table':'Таблица'};
+  const _periodLabel=_pLabels[dashView]||'';
+  const _hideNav=['alltime','table','home'].includes(dashView);
 
   let h=`
+  <div class="view-sw">
+    <button class="vsw${dashView==='home'?' on':''}" onclick="setView('home')">Главная</button>
+    <button class="vsw${dashView==='month'?' on':''}" onclick="setView('month')">Месяц</button>
+    <button class="vsw${dashView==='3m'?' on':''}" onclick="setView('3m')">3 месяца</button>
+    <button class="vsw${dashView==='6m'?' on':''}" onclick="setView('6m')">6 месяцев</button>
+    <button class="vsw${dashView==='year'?' on':''}" onclick="setView('year')">12 месяцев</button>
+    <button class="vsw${dashView==='alltime'?' on':''}" onclick="setView('alltime')">Всё время</button>
+    <button class="vsw${dashView==='table'?' on':''}" onclick="setView('table')" style="margin-left:8px;border-color:var(--pu);color:${dashView==='table'?'var(--tx)':'var(--pu)'}">⊞ Таблица</button>
+  </div>
+  <div class="period-nav">
+    <button class="pnav-btn${_hideNav?' hidden':''}" onclick="shiftPeriod(-1)">‹</button>
+    <span class="period-lbl">${_periodLabel}</span>
+    <button class="pnav-btn${_hideNav?' hidden':''}" onclick="shiftPeriod(1)">›</button>
+  </div>
   <div class="sum4">
     <div class="sc"><div class="sc-l">Мой доход</div><div class="sc-v" style="color:var(--gr)">${fmt(tI)}</div></div>
     <div class="sc"><div class="sc-l">Мои расходы</div><div class="sc-v" style="color:var(--rd)">${fmt(tX)}</div></div>
     <div class="sc"><div class="sc-l">Налог</div><div class="sc-v" style="color:var(--am)">${fmt(tT)}</div></div>
     <div class="sc"><div class="sc-l">Чистая прибыль</div><div class="sc-v ${cc(tN)}">${fmt(tN)}</div></div>
-  </div>
-  <div class="view-sw">
-    <button class="vsw${dashView==='month'?' on':''}" onclick="setView('month')">Месяц</button>
-    <button class="vsw${dashView==='3m'?' on':''}" onclick="setView('3m')">3 месяца</button>
-    <button class="vsw${dashView==='6m'?' on':''}" onclick="setView('6m')">6 месяцев</button>
-    <button class="vsw${dashView==='year'?' on':''}" onclick="setView('year')">Год ${Y}</button>
-    <button class="vsw${dashView==='alltime'?' on':''}" onclick="setView('alltime')">Всё время</button>
-    <button class="vsw${dashView==='table'?' on':''}" onclick="setView('table')" style="margin-left:8px;border-color:var(--pu);color:${dashView==='table'?'var(--tx)':'var(--pu)'}">⊞ Таблица</button>
   </div>`;
 
-  if(dashView==='year'){
-    h+=renderYearTable(v);
+  if(dashView==='home'){
+    h+=await renderHomeView(v);
+  } else if(dashView==='year'){
+    h+=renderMultiMonthView(v,12);
   } else if(dashView==='3m'||dashView==='6m'){
     h+=renderMultiMonthView(v, dashView==='3m'?3:6);
   } else if(dashView==='alltime'){
-    h+=renderAllTimeView(v);
+    h+=renderMultiMonthViewAll(v);
   } else if(dashView==='table'){
     h+=renderFullTable(v);
   } else {
     h+=renderMonthView(v);
   }
   document.getElementById('dash').innerHTML=h;
+  if(dashView==='home' && window._homeChartData){ renderHomeCharts(); }
   if(dashView==='alltime' && window._allTimeChartData){
     const d=window._allTimeChartData;
     renderAllTimeCharts(d.labels, d.netSeries, d.incSeries, d.expSeries, d.groupTotals, d.pointTotals);
@@ -753,18 +818,26 @@ function renderMonthView(v){
     h+=`<div class="gb"><div class="gh">
       <span class="gbadge b${g}">${g}</span><span class="gn">${gi.l}</span><span class="gs1"></span>
       <span class="gst">доход <b style="color:${gi.c}">${fmt(gI)}</b> · прибыль <b class="${cc(gN)}">${fmt(gN)}</b></span>
+    </div>
+    <div class="ptw"><div class="pth">
+      <span>Пункт</span>
+      <span style="color:var(--tx)">Доход</span>
+      <span>Расход</span>
+      <span>Налог</span>
+      <span>Прибыль</span>
+      <span></span>
     </div>`;
     gp.forEach(p=>{
       const s=ps(p,inc,exp);
       const isO=open===p.id;
       const at=(addState[p.id]||{type:'income'}).type;
       const cats=at==='income'?CATS.filter(c=>c.type==='income'):CATS.filter(c=>c.type==='expense');
-      h+=`<div class="ptw"><div class="pm" onclick="tog('${p.id}')">
+      h+=`<div class="pr"><div class="pm" onclick="tog('${p.id}')">
         <div class="pi"><span class="mt ${mpc(p.marketplace)}">${p.marketplace.toUpperCase()}</span><span class="pa">${p.address}</span></div>
-        <div class="pn neu">${fmt(s.iM)}</div>
-        <div class="pn" style="color:var(--rd)">${fmt(s.xM)}</div>
-        <div class="pn" style="color:var(--am)">${fmt(s.tax)}</div>
-        <div class="pn ${cc(s.net)}">${fmt(s.net)}</div>
+        <div class="pn" style="color:var(--tx)">${fmt(s.iM)}</div>
+        <div class="pn" style="color:var(--mu)">${s.xM?fmt(s.xM):'—'}</div>
+        <div class="pn" style="color:var(--mu)">${s.tax?fmt(s.tax):'—'}</div>
+        <div class="pn ${cc(s.net)}" style="font-weight:600">${fmt(s.net)}</div>
         <div class="xi">${isO?'▲':'▼'}</div>
       </div>`;
       if(isO){
@@ -828,67 +901,59 @@ function renderMonthView(v){
 
 function renderMultiMonthView(v, n){
   const months=getRangeMonths(n);
-  const shortM=['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'];
 
   if(!allInc.length&&!allExp.length){
     return '<div style="color:var(--mu);padding:20px;text-align:center;font-size:13px">Загрузка данных...</div>';
   }
 
+  // Считаем суммарные данные за весь период для каждого пункта
+  function ptCalc(p){
+    const allowed=ptCatSettings[p.id];
+    const pInc=allInc.filter(e=>e.point_id===p.id&&months.some(m=>m.month===e._month&&m.year===e._year)&&(allowed===undefined||BASE_CATS.includes(e.category)||allowed.includes(e.category)));
+    const pExp=allExp.filter(e=>e.point_id===p.id&&months.some(m=>m.month===e._month&&m.year===e._year));
+    const iM=pInc.reduce((s,e)=>s+Number(e.amount),0);
+    const xM=pExp.reduce((s,e)=>s+Number(e.amount),0);
+    const tb=pInc.filter(e=>!e.tax_exempt).reduce((s,e)=>s+Number(e.amount),0);
+    const tax=tb*p.tax_rate;
+    return{iM,xM,tax,net:iM-xM-tax,iRows:pInc,xRows:pExp};
+  }
+
   const gs=tab==='all'?['A','AD','YM']:[tab];
-  let h=`<div class="year-wrap"><table class="year-tbl"><thead><tr>
-    <th></th>${months.map(m=>`<th>${shortM[m.month-1]}<br><span style="font-size:9px;font-weight:400">${String(m.year).slice(2)}</span></th>`).join('')}<th>Итого</th>
-  </tr></thead><tbody></tbody>`;
+  let h='';
 
-  v.forEach(p=>{
-    const pInc=allInc.filter(e=>e.point_id===p.id);
-    const pExp=allExp.filter(e=>e.point_id===p.id);
-    const nets=months.map(m=>{
-      const mi=pInc.filter(e=>e._month===m.month&&e._year===m.year);
-      const mx=pExp.filter(e=>e._month===m.month&&e._year===m.year);
-      const iM=mi.reduce((s,e)=>s+Number(e.amount),0);
-      const xM=mx.reduce((s,e)=>s+Number(e.amount),0);
-      const tb=mi.filter(e=>!e.tax_exempt).reduce((s,e)=>s+Number(e.amount),0);
-      return iM-xM-tb*p.tax_rate;
+  gs.forEach(g=>{
+    const gp=v.filter(p=>p.owner_group===g);if(!gp.length)return;
+    const gi=GI[g];
+    const gI=gp.reduce((s,p)=>s+ptCalc(p).iM,0);
+    const gN=gp.reduce((s,p)=>s+ptCalc(p).net,0);
+    h+=`<div class="gb"><div class="gh">
+      <span class="gbadge b${g}">${g}</span><span class="gn">${gi.l}</span><span class="gs1"></span>
+      <span class="gst">доход <b style="color:${gi.c}">${fmt(gI)}</b> · прибыль <b class="${cc(gN)}">${fmt(gN)}</b></span>
+    </div>
+    <div class="ptw"><div class="pth">
+      <span>Пункт</span>
+      <span style="color:var(--tx)">Доход</span>
+      <span>Расход</span>
+      <span>Налог</span>
+      <span>Прибыль</span>
+      <span></span>
+    </div>`;
+
+    gp.forEach(p=>{
+      const s=ptCalc(p);
+      const mpc2=p.marketplace==='yandex'?'my':p.marketplace==='ozon'?'mo':'mw';
+      h+=`<div class="pr"><div class="pm" onclick="void(0)">
+        <div class="pi"><span class="mt ${mpc2}">${p.marketplace.toUpperCase()}</span><span class="pa">${p.address}</span></div>
+        <div class="pn" style="color:var(--tx)">${fmt(s.iM)}</div>
+        <div class="pn" style="color:var(--mu)">${s.xM?fmt(s.xM):'—'}</div>
+        <div class="pn" style="color:var(--mu)">${s.tax?fmt(s.tax):'—'}</div>
+        <div class="pn ${cc(s.net)}" style="font-weight:600">${fmt(s.net)}</div>
+        <div class="xi">▼</div>
+      </div></div>`;
     });
-    const totNet=nets.reduce((s,n)=>s+n,0);
-    const incTots=months.map(m=>pInc.filter(e=>e._month===m.month&&e._year===m.year).reduce((s,e)=>s+Number(e.amount),0));
-    const expTots=months.map(m=>pExp.filter(e=>e._month===m.month&&e._year===m.year).reduce((s,e)=>s+Number(e.amount),0));
-    const mpc2=p.marketplace==='yandex'?'my':p.marketplace==='ozon'?'mo':'mw';
-
-    h+=`<tr class="row-total">
-      <td><div class="pi"><span class="mt ${mpc2}" style="font-size:8px">${p.marketplace.toUpperCase()}</span>${p.address}</div></td>
-      ${nets.map(n=>`<td class="${n?cc(n):'zero'}">${n?fmt(n):'—'}</td>`).join('')}
-      <td class="${cc(totNet)}">${fmt(totNet)}</td>
-    </tr>
-    <tr class="row-cat">
-      <td style="padding-left:20px">Доход (моя доля)</td>
-      ${incTots.map(n=>`<td class="${n?'neu':'zero'}">${n?fmt(n):'—'}</td>`).join('')}
-      <td class="neu">${fmt(incTots.reduce((s,n)=>s+n,0))}</td>
-    </tr>
-    <tr class="row-cat">
-      <td style="padding-left:20px">Расходы (моя доля)</td>
-      ${expTots.map(n=>`<td class="${n?'neg':'zero'}">${n?fmt(n):'—'}</td>`).join('')}
-      <td class="neg">${fmt(expTots.reduce((s,n)=>s+n,0))}</td>
-    </tr>`;
+    h+=`</div></div>`;
   });
 
-  // Итоговая строка
-  const totalNets=months.map((_,i)=>v.reduce((s,p)=>{
-    const mi=allInc.filter(e=>e.point_id===p.id&&e._month===months[i].month&&e._year===months[i].year);
-    const mx=allExp.filter(e=>e.point_id===p.id&&e._month===months[i].month&&e._year===months[i].year);
-    const iM=mi.reduce((a,e)=>a+Number(e.amount),0);
-    const xM=mx.reduce((a,e)=>a+Number(e.amount),0);
-    const tb=mi.filter(e=>!e.tax_exempt).reduce((a,e)=>a+Number(e.amount),0);
-    return s+iM-xM-tb*p.tax_rate;
-  },0));
-  const grandNet=totalNets.reduce((s,n)=>s+n,0);
-  h+=`<tr class="row-total" style="border-top:2px solid var(--b2)">
-    <td><b>Итого прибыль</b></td>
-    ${totalNets.map(n=>`<td class="${cc(n)}">${fmt(n)}</td>`).join('')}
-    <td class="${cc(grandNet)}"><b>${fmt(grandNet)}</b></td>
-  </tr>`;
-
-  h+=`</tbody></table></div>`;
   return h;
 }
 
@@ -1150,15 +1215,15 @@ const TAX_LBLS_CAT=['AV_yandex','AV_ozon','AV_wb']; // не использует
 
 // Собрать данные по пункту из allInc/allExp за все месяцы
 function buildPointTableData(p) {
-  // Собираем данные из allInc/allExp
-  // ВАЖНО: суммы в таблице уже с учётом доли, поэтому храним как есть
-  const rows = {}; // { category: { 'MM/YY': amount } }
+  const rows = {};
+  const allowed = ptCatSettings[p.id]; // undefined = не задано (показываем всё с данными)
 
   allInc.filter(e=>e.point_id===p.id).forEach(e=>{
     const cat = e.category;
+    // Если настройки заданы явно — скрываем выключенные категории
+    if(allowed!==undefined && !BASE_CATS.includes(cat) && !allowed.includes(cat)) return;
     const mkey = String(e._month).padStart(2,'0')+'/'+String(e._year).slice(2);
     if(!rows[cat]) rows[cat]={};
-    // amount уже моя доля — не умножаем
     rows[cat][mkey] = (rows[cat][mkey]||0) + Number(e.amount);
   });
   allExp.filter(e=>e.point_id===p.id).forEach(e=>{
@@ -1451,7 +1516,7 @@ async function setView(v){
     document.getElementById('dash').innerHTML='<div style="padding:40px;text-align:center;color:var(--mu)">Загрузка...</div>';
     await loadAllMonths();
   }
-  drawDash();
+  await drawDash();
 }
 
 // ── POINT INTERACTIONS ─────────────────────────────────────────
@@ -1480,25 +1545,51 @@ async function archP(id,cur){await db.from('points').update({is_archived:!cur}).
 // Проверяет, заполнены ли данные по категории за текущий месяц для всех релевантных пунктов
 function isCatFilled(v){
   const rel=ptsForCat(v);
-  if(!rel.length)return false;
+  if(!rel.length) return 'none';
   const c=CATS.find(x=>x.v===v);
+  // Смотрим данные за выбранный в попапе месяц (entryM/entryY)
   const source=(c&&c.type==='expense')?exp:inc;
-  const existingIds=new Set(source.filter(e=>e.category===v).map(e=>e.point_id));
-  return rel.every(p=>existingIds.has(p.id));
+  // Если entryM/entryY совпадает с текущим M/Y — берём из inc/exp
+  // Иначе нужно смотреть в allInc/allExp
+  const allSource=(c&&c.type==='expense')?allExp:allInc;
+  const entries=allSource.length
+    ? allSource.filter(e=>e.category===v&&e._month===entryM&&e._year===entryY)
+    : source.filter(e=>e.category===v);
+  const filledIds=new Set(entries.map(e=>e.point_id));
+  const filledCount=rel.filter(p=>filledIds.has(p.id)).length;
+  if(filledCount===0) return 'none';
+  if(filledCount===rel.length) return 'full';
+  return 'partial';
 }
 function catBtnHtml(c){
   const filled=isCatFilled(c.v);
-  return `<button class="cat-btn${filled?' filled':''}" data-v="${c.v}" onclick="selCatFn('${c.v}')">${filled?'<span class=\'cat-check\'>✓</span> ':''}${c.l}</button>`;
+  if(filled==='full')
+    return `<button class="cat-btn filled" data-v="${c.v}" onclick="selCatFn('${c.v}')"><span class='cat-check'>✓</span> ${c.l}</button>`;
+  if(filled==='partial')
+    return `<button class="cat-btn partial" data-v="${c.v}" onclick="selCatFn('${c.v}')"><span class='cat-check' style='color:var(--am)'>◑</span> ${c.l}</button>`;
+  return `<button class="cat-btn" data-v="${c.v}" onclick="selCatFn('${c.v}')">${c.l}</button>`;
 }
-function buildCatGrid(){
-  let h='<div class="cat-section-lbl">Доходы</div>';
-  CATS.filter(c=>c.type==='income').forEach(c=>{h+=catBtnHtml(c)});
-  h+='<div class="cat-section-lbl">Расходы</div>';
-  CATS.filter(c=>c.type==='expense').forEach(c=>{h+=catBtnHtml(c)});
+function buildCatGrid(activeType){
+  const t=activeType||'income';
+  // Подсвечиваем активную вкладку
+  document.querySelectorAll('.cat-tab').forEach(b=>{
+    b.classList.toggle('on', b.dataset.t===t);
+  });
+  // Рендерим только нужные кнопки
+  const cats=CATS.filter(c=>c.type===t);
+  let h=cats.map(c=>catBtnHtml(c)).join('');
   document.getElementById('cat-grid').innerHTML=h;
-  // Восстанавливаем выделение текущей выбранной категории
+  // Если переключились на другую вкладку — сбрасываем выбранную категорию
   if(selCat){
-    document.querySelectorAll('.cat-btn').forEach(b=>b.classList.toggle('on',b.dataset.v===selCat));
+    const sc=CATS.find(c=>c.v===selCat);
+    if(sc&&sc.type!==t){
+      selCat=null;
+      document.getElementById('entry-tbl-wrap').style.display='none';
+      document.getElementById('entry-date-wrap').style.display='none';
+      document.getElementById('ep-foot').style.display='none';
+    } else {
+      document.querySelectorAll('.cat-btn').forEach(b=>b.classList.toggle('on',b.dataset.v===selCat));
+    }
   }
 }
 function selCatFn(v){
@@ -1509,22 +1600,35 @@ function selCatFn(v){
 function ptsForCat(v){
   const c=CATS.find(x=>x.v===v);
   let base=arch?pts:pts.filter(p=>!p.is_archived);
-  if(c&&c.mp)base=base.filter(p=>p.marketplace===c.mp);
-  if(c&&c.addresses)base=base.filter(p=>c.addresses.includes(p.address));
+  if(c&&c.mp) base=base.filter(p=>p.marketplace===c.mp);
+  if(c&&c.addresses) base=base.filter(p=>c.addresses.includes(p.address));
+  // Фильтр по настройкам пользователя (только для доп. категорий)
+  if(!BASE_CATS.includes(v)){
+    base=base.filter(p=>{
+      const ptAllowed=ptCatSettings[p.id];
+      if(ptAllowed!==undefined) return ptAllowed.includes(v);
+      if(allInc&&allInc.length) return allInc.some(e=>e.point_id===p.id&&e.category===v);
+      return true; // данные ещё не загружены — показываем всех
+    });
+  }
   return base;
 }
 function buildEntryTbl(){
   const cat=CATS.find(c=>c.v===selCat);if(!cat)return;
   const rel=ptsForCat(selCat);
-  const today=new Date().toISOString().split('T')[0];
+  const today=entryY+'-'+String(entryM).padStart(2,'0')+'-01';
   const isComm=!!cat.commission;
   const commPct=cat.commission||1;
   const isExp=cat.type==='expense';
   const isPerOp=!!cat.perOperation;
 
-  // Уже внесённые данные за текущий месяц
+  // Уже внесённые данные за выбранный в попапе месяц (entryM/entryY)
   const existing={}, existingDates={}, existingNotes={};
-  (isExp?exp:inc).filter(e=>e.category===selCat).forEach(e=>{
+  const allSource=isExp?allExp:allInc;
+  const monthSource=allSource.filter(e=>e.category===selCat&&e._month===entryM&&e._year===entryY);
+  // Если allInc ещё не загружен — берём из inc/exp текущего месяца как фолбэк
+  const sourceData=allSource.length?monthSource:(isExp?exp:inc).filter(e=>e.category===selCat&&(entryM===M&&entryY===Y));
+  sourceData.forEach(e=>{
     existing[e.point_id]=(existing[e.point_id]||0)+Number(e.amount);
     existingDates[e.point_id]=e.entry_date||today;
     existingNotes[e.point_id]=e.notes||'';
@@ -1579,8 +1683,8 @@ function buildEntryTbl(){
         ?`<td style="text-align:right"><input class="amt-inp" type="number" min="0" step="0.01" placeholder="—" id="amt-${p.id}" oninput="updEpTotal()" data-share="${p.my_share}" data-comm="${commPct}" value="${displayVal}"/></td>
           <td style="text-align:right"><span class="share-hint" id="comm-${p.id}" style="color:var(--am)">—</span></td>`
         : isPerOp
-        ?`<td style="text-align:right"><input class="perop-price" type="number" min="0" step="0.01" placeholder="—" id="price-${p.id}" oninput="updEpTotal()" value="${perOpPrice}" style="width:80px;background:var(--bg4);border:1px solid var(--b2);border-radius:7px;color:var(--tx);font-family:monospace;font-size:12px;padding:5px 8px;outline:none;text-align:right"/></td>
-          <td style="text-align:right"><input class="perop-qty" type="number" min="0" step="1" placeholder="—" id="qty-${p.id}" oninput="updEpTotal()" value="${perOpQty}" style="width:70px;background:var(--bg4);border:1px solid var(--b2);border-radius:7px;color:var(--tx);font-family:monospace;font-size:12px;padding:5px 8px;outline:none;text-align:right"/></td>
+        ?`<td style="text-align:right"><input class="perop-price" type="number" min="0" step="0.01" placeholder="—" id="price-${p.id}" oninput="updEpTotal()" value="${perOpPrice}" style="width:80px;background:var(--bg4);border:1px solid var(--b2);border-radius:7px;color:var(--tx);font-family:inherit;font-size:12px;padding:5px 8px;outline:none;text-align:right"/></td>
+          <td style="text-align:right"><input class="perop-qty" type="number" min="0" step="1" placeholder="—" id="qty-${p.id}" oninput="updEpTotal()" value="${perOpQty}" style="width:70px;background:var(--bg4);border:1px solid var(--b2);border-radius:7px;color:var(--tx);font-family:inherit;font-size:12px;padding:5px 8px;outline:none;text-align:right"/></td>
           <td style="text-align:right"><span class="share-hint" id="perop-tot-${p.id}" style="color:var(--bl)">—</span>
             <input type="hidden" class="amt-inp" id="amt-${p.id}" data-share="${p.my_share}" data-comm="1" data-perop="1" value=""/></td>`
         :`<td style="text-align:right"><input class="amt-inp" type="number" min="0" step="0.01" placeholder="—" id="amt-${p.id}" oninput="updEpTotal()" data-share="${p.my_share}" data-comm="1" value="${displayVal}"/></td>`
@@ -1759,15 +1863,38 @@ async function saveAll(){
     btn.disabled=false;btn.textContent='Сохранить всё';
   }
 }
-function showEntry(){
+async function showEntry(type){
+  selCat=null;
+  entryM=new Date().getMonth()+1;
+  entryY=new Date().getFullYear();
+  document.getElementById('entry-tbl-wrap').style.display='none';
+  document.getElementById('entry-date-wrap').style.display='none';
+  document.getElementById('ep-foot').style.display='none';
+  updEntryPeriod();
+  document.getElementById('entry-modal').classList.add('open');
+  document.body.style.overflow='hidden';
+  // Загружаем все данные чтобы галочки были точными
+  if(!allInc.length) await loadAllMonths();
+  buildCatGrid(type||'income');
+}
+
+function updEntryPeriod(){
+  document.getElementById('modal-period').textContent=MN[entryM-1]+' '+entryY;
+  // Обновляем дату по умолчанию
+  const dateEl=document.getElementById('entry-date');
+  if(dateEl) dateEl.value=entryY+'-'+String(entryM).padStart(2,'0')+'-01';
+}
+
+async function shiftEntryM(d){
+  entryM+=d;
+  if(entryM>12){entryM=1;entryY++;}
+  if(entryM<1){entryM=12;entryY--;}
+  updEntryPeriod();
   selCat=null;
   document.getElementById('entry-tbl-wrap').style.display='none';
   document.getElementById('entry-date-wrap').style.display='none';
   document.getElementById('ep-foot').style.display='none';
-  document.getElementById('modal-period').textContent=MN[M-1]+' '+Y;
-  document.getElementById('entry-modal').classList.add('open');
-  document.body.style.overflow='hidden';
-  buildCatGrid(); // обновляем галочки "внесено" по свежим данным
+  buildCatGrid();
 }
 function hideEntry(){
   document.getElementById('entry-modal').classList.remove('open');
@@ -1779,8 +1906,401 @@ function onOverlayClick(e){if(e.target===document.getElementById('entry-modal'))
 function swTab(t){tab=t;open=null;document.querySelectorAll('.tab').forEach(el=>el.classList.toggle('on',el.dataset.t===t));drawDash()}
 function updLbl(){document.getElementById('plbl').textContent=MN[M-1]+' '+Y}
 async function shiftM(d){M+=d;if(M>12){M=1;Y++}if(M<1){M=12;Y--}updLbl();open=null;allInc=[];allExp=[];document.getElementById('dash').innerHTML='<div style="padding:40px;text-align:center;color:var(--mu)">Загрузка...</div>';await load();drawDash()}
+
+async function shiftPeriod(d){
+  // Сдвиг периода в зависимости от текущего вида
+  if(dashView==='month'){
+    M+=d;if(M>12){M=1;Y++}if(M<1){M=12;Y--}
+  } else if(dashView==='3m'){
+    M+=d*3;while(M>12){M-=12;Y++}while(M<1){M+=12;Y--}
+  } else if(dashView==='6m'){
+    M+=d*6;while(M>12){M-=12;Y++}while(M<1){M+=12;Y--}
+  } else if(dashView==='year'){
+    Y+=d;
+  } else {
+    return; // alltime и table не листаются
+  }
+  updLbl();open=null;allInc=[];allExp=[];
+  document.getElementById('dash').innerHTML='<div style="padding:40px;text-align:center;color:var(--mu)">Загрузка...</div>';
+  await setView(dashView);
+}
 function toggleArch(){arch=!arch;const b=document.getElementById('arch-btn');b.style.borderColor=arch?'var(--am)':'var(--b)';b.style.color=arch?'var(--am)':'var(--mu)';drawDash()}
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500)}
+// ── НАСТРОЙКИ: доп. доходы по пунктам ────────────────────────
+
+// Базовые категории (АВ) — не показываем в настройках
+const BASE_CATS = ['AV_yandex','AV_ozon','AV_wb','rent_util','salary','internet','cameras','supplies'];
+
+// Динамический список доп. категорий = всё из CATS кроме базовых + пользовательские
+function getExtraCats(){
+  const sys = CATS.filter(c=>!BASE_CATS.includes(c.v)&&c.type==='income').map(c=>({v:c.v,l:c.l,system:true}));
+  const custom = (JSON.parse(localStorage.getItem('pvz_custom_cats')||'[]'));
+  return [...sys, ...custom];
+}
+
+// Локальное хранилище настроек — какие категории доступны для каждого пункта
+// Формат: {point_id: Set(['YMVmeste', 'ChemClean', ...]} — undefined означает "все"
+let ptCatSettings = {};
+
+function loadPtCatSettings(){
+  try{
+    const raw=localStorage.getItem('pvz_pt_cats');
+    if(raw) ptCatSettings=JSON.parse(raw,(_,v)=>Array.isArray(v)?v:v);
+    else ptCatSettings={};
+  }catch(e){ptCatSettings={};}
+}
+
+function savePtCatSettings(){
+  localStorage.setItem('pvz_pt_cats', JSON.stringify(ptCatSettings));
+}
+
+// Применяем настройки к фильтрации пунктов в попапе
+// Переопределяем ptsForCat чтобы учитывать индивидуальные настройки
+// ptsForCat теперь объединена в одну функцию выше
+
+async function openSettings(){
+  loadPtCatSettings();
+  // Показываем модал сразу
+  document.getElementById('settings-modal').classList.add('open');
+  document.body.style.overflow='hidden';
+  document.getElementById('settings-body').innerHTML='<div style="padding:40px;text-align:center;color:var(--mu)">Загрузка данных...</div>';
+  // Подгружаем ВСЕ данные из базы чтобы галочки отражали реальность
+  if(!allInc.length) await loadAllMonths();
+  renderSettingsBody();
+}
+
+function closeSettings(){
+  document.getElementById('settings-modal').classList.remove('open');
+  document.body.style.overflow='';
+}
+
+function onSettingsOverlay(e){
+  if(e.target===document.getElementById('settings-modal')) closeSettings();
+}
+
+function addCustomCat(){
+  const name = prompt('Название новой категории:','');
+  if(!name||!name.trim()) return;
+  const label = name.trim();
+  const key = 'custom_'+label.toLowerCase().replace(/[^a-zа-яё0-9]/gi,'_')+'_'+Date.now();
+  const customs = JSON.parse(localStorage.getItem('pvz_custom_cats')||'[]');
+  if(customs.find(c=>c.l===label)){toast('Такая категория уже есть');return;}
+  customs.push({v:key,l:label,system:false});
+  localStorage.setItem('pvz_custom_cats', JSON.stringify(customs));
+  // Добавляем в CATS чтобы работало в попапе
+  CATS.push({v:key,l:label,type:'income'});
+  // Добавляем в CL
+  CL[key]=label;
+  toast('✓ Категория «'+label+'» добавлена');
+  renderSettingsBody();
+}
+
+function removeCustomCat(v){
+  if(!confirm('Удалить категорию из списка?')) return;
+  const customs = JSON.parse(localStorage.getItem('pvz_custom_cats')||'[]');
+  localStorage.setItem('pvz_custom_cats', JSON.stringify(customs.filter(c=>c.v!==v)));
+  const idx = CATS.findIndex(c=>c.v===v);
+  if(idx>=0) CATS.splice(idx,1);
+  renderSettingsBody();
+}
+
+function loadCustomCats(){
+  const customs = JSON.parse(localStorage.getItem('pvz_custom_cats')||'[]');
+  customs.forEach(c=>{
+    if(!CATS.find(x=>x.v===c.v)){
+      CATS.push({v:c.v,l:c.l,type:'income'});
+      CL[c.v]=c.l;
+    }
+  });
+}
+
+function renderSettingsBody(){
+  const activePts = pts.filter(p=>!p.is_archived);
+  const EXTRA_CATS = getExtraCats();
+
+  // Для каждого пункта определяем какие категории активны:
+  // Активна = есть данные в базе ИЛИ явно включена в ptCatSettings
+  // Для первого открытия (ptCatSettings пуст) — активна только если есть данные в базе
+  function isCatActiveForPt(pid, catV){
+    // 1. Если в настройках явно задано — берём оттуда
+    if(ptCatSettings[pid]!==undefined){
+      return ptCatSettings[pid].includes(catV);
+    }
+    // 2. Иначе — смотрим есть ли реальные данные в allInc
+    if(allInc&&allInc.length){
+      return allInc.some(e=>e.point_id===pid&&e.category===catV);
+    }
+    return false;
+  }
+
+  let h=`<style>
+    .stg-pt{background:var(--bg3);border:1px solid var(--b);border-radius:12px;padding:14px 16px;margin-bottom:10px}
+    .stg-pt-head{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+    .stg-pt-name{font-size:13px;font-weight:600;color:var(--tx)}
+    .stg-cats{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px}
+    .stg-cat{display:flex;align-items:center;gap:8px;background:var(--bg4);border:1px solid var(--b);border-radius:8px;padding:8px 10px;cursor:pointer;transition:all .15s;user-select:none}
+    .stg-cat:hover{border-color:var(--b2)}
+    .stg-cat.active{border-color:rgba(52,199,89,.5);background:rgba(52,199,89,.08)}
+    .stg-cat input{display:none}
+    .stg-toggle{width:16px;height:16px;border-radius:4px;border:1.5px solid var(--b2);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;font-size:11px}
+    .stg-cat.active .stg-toggle{background:var(--gr);border-color:var(--gr);color:#071a0e}
+    .stg-cat-lbl{font-size:11px;color:var(--mu);line-height:1.3}
+    .stg-cat.active .stg-cat-lbl{color:var(--tx)}
+    .stg-actions{display:flex;gap:8px;margin-top:4px;flex-wrap:wrap}
+    .stg-hint{font-size:11px;color:var(--mu);margin-left:auto;font-style:italic}
+  </style>`;
+
+  h+=`<div style="font-size:12px;color:var(--mu);margin-bottom:16px;line-height:1.5">
+    Галочка стоит — категория есть в данных или включена вручную. Снимите галочку — категория скроется из расчётов и попапа. Поставьте галочку — появится в попапе для этого пункта.
+  </div>`;
+
+  activePts.forEach(p=>{
+    h+=`<div class="stg-pt">
+      <div class="stg-pt-head">
+        <span class="mt ${mpc(p.marketplace)}" style="font-size:9px">${p.marketplace.toUpperCase()}</span>
+        <span class="gbadge b${p.owner_group}" style="font-size:9px">${p.owner_group}</span>
+        <span class="stg-pt-name">${p.address}</span>
+      </div>
+      <div class="stg-cats">
+        ${EXTRA_CATS.map(c=>{
+          const on=isCatActiveForPt(p.id,c.v);
+          // Есть ли реальные данные (для визуальной подсказки)
+          const hasData=allInc&&allInc.some(e=>e.point_id===p.id&&e.category===c.v);
+          return `<label class="stg-cat${on?' active':''}" title="${hasData?'Есть данные в базе':'Нет данных'}">
+            <input type="checkbox" data-pid="${p.id}" data-cat="${c.v}" ${on?'checked':''} onchange="onStgCatChange(this)"/>
+            <span class="stg-toggle">${on?'✓':''}</span>
+            <span class="stg-cat-lbl">${c.l}${hasData?'':' <span style=\'font-size:9px;color:var(--mu2)\'>·</span>'}</span>
+          </label>`;
+        }).join('')}
+      </div>
+    </div>`;
+  });
+
+  // Пользовательские категории
+  const customs = JSON.parse(localStorage.getItem('pvz_custom_cats')||'[]');
+  if(customs.length){
+    h+=`<div style="margin-top:16px;margin-bottom:8px;font-size:11px;font-weight:600;color:var(--mu);text-transform:uppercase;letter-spacing:.06em">Мои категории</div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px">
+      ${customs.map(c=>`<div style="display:flex;align-items:center;gap:6px;background:var(--bg3);border:1px solid var(--b2);border-radius:8px;padding:6px 10px">
+        <span style="font-size:12px;color:var(--tx)">${c.l}</span>
+        <button onclick="removeCustomCat('${c.v}')" style="background:none;border:none;color:var(--mu);cursor:pointer;font-size:14px;line-height:1;padding:0 2px" title="Удалить">×</button>
+      </div>`).join('')}
+    </div>`;
+  }
+
+  h+=`<div class="stg-actions">
+    <button onclick="addCustomCat()" class="cancel-ep" style="font-size:11px;border-color:rgba(52,199,89,.4);color:var(--gr)">+ Добавить категорию</button>
+    <button onclick="settingsSelectAll()" class="cancel-ep" style="font-size:11px">✓ Включить всё</button>
+    <button onclick="settingsClearAll()" class="cancel-ep" style="font-size:11px;color:var(--rd);border-color:rgba(255,69,58,.3)">✕ Выключить всё</button>
+  </div>`;
+
+  document.getElementById('settings-body').innerHTML=h;
+}
+
+// При изменении чекбокса — сразу обновляем ptCatSettings для этого пункта
+function onStgCatChange(cb){
+  const tog=cb.closest('.stg-cat').querySelector('.stg-toggle');
+  cb.closest('.stg-cat').classList.toggle('active',cb.checked);
+  tog.textContent=cb.checked?'✓':'';
+}
+
+function saveSettings(){
+  const checks=document.querySelectorAll('#settings-body input[data-pid]');
+  const result={};
+  checks.forEach(cb=>{
+    const pid=cb.dataset.pid, cat=cb.dataset.cat;
+    if(!result[pid]) result[pid]=[];
+    if(cb.checked) result[pid].push(cat);
+  });
+  ptCatSettings=result;
+  savePtCatSettings();
+  toast('✓ Настройки сохранены');
+  closeSettings();
+  if(document.getElementById('entry-modal').classList.contains('open')) buildCatGrid();
+  drawDash();
+}
+
+function settingsSelectAll(){
+  document.querySelectorAll('#settings-body input[type=checkbox]').forEach(cb=>cb.checked=true);
+}
+function settingsClearAll(){
+  document.querySelectorAll('#settings-body input[type=checkbox]').forEach(cb=>cb.checked=false);
+}
+
+// Загружаем настройки и кастомные категории при старте
+loadPtCatSettings();
+loadCustomCats();
+
+// ── ГЛАВНАЯ ────────────────────────────────────────────────────
+async function renderHomeView(v){
+  if(!allInc.length&&!allExp.length)
+    return '<div style="padding:40px;text-align:center;color:var(--mu)">Нет данных</div>';
+
+  // Прошлый месяц — всегда от реальной текущей даты, не от M/Y дашборда
+  const _now=new Date();
+  let pm=_now.getMonth(); // getMonth() = 0-11, т.е. текущий месяц - 1
+  let py=_now.getFullYear();
+  if(pm<1){pm=12;py--;}
+  // Три месяца до прошлого включительно (pm-2, pm-1, pm)
+  function get3months(){
+    const res=[];
+    let cm=pm,cy=py;
+    for(let i=0;i<3;i++){
+      res.unshift({month:cm,year:cy});
+      cm--;if(cm<1){cm=12;cy--;}
+    }
+    return res;
+  }
+  const months3=get3months();
+  const MNS=['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'];
+  const pmLabel=MNS[pm-1]+' '+py;
+  const m3Label=MNS[months3[0].month-1]+' '+months3[0].year+'–'+MNS[pm-1]+' '+py;
+
+  // Базовые категории (АВ) — не допы
+  const EXTRA_V=CATS.filter(c=>!BASE_CATS.includes(c.v)&&c.type==='income').map(c=>c.v);
+
+  function ptNet(p, monthList){
+    const allowed=ptCatSettings[p.id];
+    const mi=allInc.filter(e=>e.point_id===p.id&&monthList.some(m=>m.month===e._month&&m.year===e._year)&&(allowed===undefined||BASE_CATS.includes(e.category)||allowed.includes(e.category)));
+    const mx=allExp.filter(e=>e.point_id===p.id&&monthList.some(m=>m.month===e._month&&m.year===e._year));
+    const iM=mi.reduce((s,e)=>s+Number(e.amount),0);
+    const xM=mx.reduce((s,e)=>s+Number(e.amount),0);
+    const tax=mi.filter(e=>!e.tax_exempt).reduce((s,e)=>s+Number(e.amount),0)*p.tax_rate;
+    return iM-xM-tax;
+  }
+
+  function ptExtraNet(p, monthList){
+    const allowed=ptCatSettings[p.id];
+    const mi=allInc.filter(e=>e.point_id===p.id&&monthList.some(m=>m.month===e._month&&m.year===e._year)&&EXTRA_V.includes(e.category)&&(allowed===undefined||allowed.includes(e.category)));
+    const iM=mi.reduce((s,e)=>s+Number(e.amount),0);
+    const tax=mi.filter(e=>!e.tax_exempt).reduce((s,e)=>s+Number(e.amount),0)*p.tax_rate;
+    return iM-tax;
+  }
+
+  function topBottom(pts, monthList, n=5){
+    const sorted=pts.map(p=>({p,net:ptNet(p,monthList)})).filter(x=>x.net!==0).sort((a,b)=>b.net-a.net);
+    return{top:sorted.slice(0,n), bottom:[...sorted].reverse().slice(0,n)};
+  }
+
+  function renderRank(list){
+    if(!list.length) return '<div style="color:var(--mu2);font-size:12px;padding:8px 0">Нет данных</div>';
+    const maxAbs=Math.max(...list.map(x=>Math.abs(x.net)));
+    return list.map((x,i)=>{
+      const mpc2=x.p.marketplace==='yandex'?'my':x.p.marketplace==='ozon'?'mo':'mw';
+      const pct=maxAbs?Math.round(Math.abs(x.net)/maxAbs*100):0;
+      const col=x.net>=0?'var(--gr)':'var(--rd)';
+      return '<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--b)">'+
+        '<span style="font-size:10px;color:var(--mu2);width:14px;text-align:right">'+(i+1)+'</span>'+
+        '<span class="mt '+mpc2+'" style="font-size:9px">'+x.p.marketplace.toUpperCase()+'</span>'+
+        '<span class="gbadge b'+x.p.owner_group+'" style="font-size:9px">'+x.p.owner_group+'</span>'+
+        '<span style="font-size:11px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+x.p.address+'</span>'+
+        '<div style="width:60px;height:3px;background:var(--bg4);border-radius:2px;overflow:hidden;flex-shrink:0">'+
+          '<div style="width:'+pct+'%;height:100%;background:'+col+';border-radius:2px"></div>'+
+        '</div>'+
+        '<span style="font-size:11px;font-weight:600;color:'+col+';width:80px;text-align:right;flex-shrink:0">'+fmt(x.net)+'</span>'+
+      '</div>';
+    }).join('');
+  }
+
+  function renderExtraRank(pts, monthList){
+    // Считаем по категориям, не по пунктам
+    const catTotals={};
+    pts.forEach(p=>{
+      const allowed=ptCatSettings[p.id];
+      EXTRA_V.forEach(cv=>{
+        if(allowed!==undefined&&!allowed.includes(cv)) return;
+        const mi=allInc.filter(e=>e.point_id===p.id&&monthList.some(m=>m.month===e._month&&m.year===e._year)&&e.category===cv);
+        const iM=mi.reduce((s,e)=>s+Number(e.amount),0);
+        const tax=mi.filter(e=>!e.tax_exempt).reduce((s,e)=>s+Number(e.amount),0)*p.tax_rate;
+        if(iM>0){
+          if(!catTotals[cv]) catTotals[cv]=0;
+          catTotals[cv]+=(iM-tax);
+        }
+      });
+    });
+    const sorted=Object.entries(catTotals).filter(([,v])=>v>0).sort((a,b)=>b[1]-a[1]);
+    if(!sorted.length) return '<div style="color:var(--mu2);font-size:12px;padding:8px 0">Нет данных</div>';
+    const max=sorted[0][1];
+    return sorted.slice(0,7).map(([cv,net],i)=>{
+      const cat=CATS.find(c=>c.v===cv);
+      const label=cat?cat.l:cv;
+      const pct=max?Math.round(net/max*100):0;
+      return '<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--b)">'+
+        '<span style="font-size:10px;color:var(--mu2);width:14px;text-align:right">'+(i+1)+'</span>'+
+        '<span style="font-size:12px;flex:1">'+label+'</span>'+
+        '<div style="width:80px;height:3px;background:var(--bg4);border-radius:2px;overflow:hidden;flex-shrink:0">'+
+          '<div style="width:'+pct+'%;height:100%;background:var(--gr);border-radius:2px"></div>'+
+        '</div>'+
+        '<span style="font-size:11px;font-weight:600;color:var(--gr);width:80px;text-align:right;flex-shrink:0">'+fmt(net)+'</span>'+
+      '</div>';
+    }).join('');
+  }
+
+  const pm1=[{month:pm,year:py}];
+  const {top:top1m,bottom:bot1m}=topBottom(v,pm1);
+  const {top:top3m,bottom:bot3m}=topBottom(v,months3);
+
+  function card(title, content){
+    return '<div style="background:var(--bg2);border:1px solid var(--b);border-radius:12px;padding:14px 16px">'+
+      '<div style="font-size:11px;font-weight:600;color:var(--mu);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">'+title+'</div>'+
+      content+
+    '</div>';
+  }
+
+  const s1='<div style="font-size:11px;font-weight:600;color:var(--mu);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">';
+  const s2='</div>';
+  const grid='<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px">';
+  return (
+    s1+pmLabel+s2+
+    grid+
+      card('🏆 Топ-5 по прибыли',renderRank(top1m))+
+      card('📉 Низкая прибыль',renderRank(bot1m))+
+    s2+
+    s1+m3Label+s2+
+    grid+
+      card('🏆 Топ-5 по прибыли',renderRank(top3m))+
+      card('📉 Низкая прибыль',renderRank(bot3m))+
+    s2+
+    s1+'Топ допов'+s2+
+    grid+
+      card('За прошлый месяц · '+pmLabel,renderExtraRank(v,pm1))+
+      card('За 3 месяца · '+m3Label,renderExtraRank(v,months3))+
+    s2
+  );
+}
+
+function renderMultiMonthViewAll(v){
+  // Берём все уникальные месяцы из базы и считаем суммарно через renderMultiMonthView
+  const monthSet=new Set();
+  [...allInc,...allExp].forEach(e=>{
+    if(e._year&&e._month) monthSet.add(e._year+'-'+String(e._month).padStart(2,'0'));
+  });
+  const n=monthSet.size||1;
+  return renderMultiMonthView(v,n);
+}
+
+function renderHomeCharts(){
+  const d=window._homeChartData;
+  if(!d)return;
+  if(window._homeCharts){window._homeCharts.forEach(c=>c.destroy());}
+  window._homeCharts=[];
+  const fR=v=>(v<0?'-':'')+new Intl.NumberFormat('ru-RU').format(Math.abs(Math.round(v)))+'\u202f\u20bd';
+
+  const n=document.getElementById('chart-home-net');
+  if(n) window._homeCharts.push(new Chart(n,{type:'line',data:{labels:d.labels,datasets:[{label:'Прибыль',data:d.netSeries,borderColor:'#2a9d4e',backgroundColor:'rgba(42,157,78,.07)',fill:true,tension:.3,pointRadius:2,segment:{borderColor:ctx=>ctx.p0.parsed.y<0||ctx.p1.parsed.y<0?'#c0392b':'#2a9d4e'}}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>fR(c.parsed.y)}}},scales:{y:{ticks:{color:'#6a6864',callback:v=>fR(v)},grid:{color:'rgba(255,255,255,.05)'}},x:{ticks:{color:'#6a6864',maxTicksLimit:12},grid:{display:false}}}}}));
+
+  const ie=document.getElementById('chart-home-inc');
+  if(ie) window._homeCharts.push(new Chart(ie,{type:'bar',data:{labels:d.labels,datasets:[{label:'Доход',data:d.incSeries,backgroundColor:'rgba(42,157,78,.55)'},{label:'Расход',data:d.expSeries.map(v=>-v),backgroundColor:'rgba(106,104,100,.35)'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.dataset.label+': '+fR(Math.abs(c.parsed.y))}}},scales:{y:{ticks:{color:'#6a6864',callback:v=>fR(v)},grid:{color:'rgba(255,255,255,.05)'}},x:{ticks:{color:'#6a6864',maxTicksLimit:12},grid:{display:false}}}}}));
+
+  const gr=document.getElementById('chart-home-grp');
+  if(gr) window._homeCharts.push(new Chart(gr,{type:'doughnut',data:{labels:['А','А+Д','ЯМ'],datasets:[{data:[Math.round(d.grpTotals.A),Math.round(d.grpTotals.AD),Math.round(d.grpTotals.YM)],backgroundColor:['#8e44c7','#3a9fbf','#b8960a'],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:'bottom',labels:{color:'#6a6864',font:{size:11}}},tooltip:{callbacks:{label:c=>c.label+': '+fR(c.parsed)}}}}}));
+
+  const pt=document.getElementById('chart-home-pts');
+  if(pt) window._homeCharts.push(new Chart(pt,{type:'bar',data:{labels:d.ptTotals.map(p=>p.name),datasets:[{data:d.ptTotals.map(p=>Math.round(p.net)),backgroundColor:d.ptTotals.map(p=>p.net>=0?'rgba(42,157,78,.65)':'rgba(192,57,43,.65)')}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>fR(c.parsed.x)}}},scales:{x:{ticks:{color:'#6a6864',callback:v=>fR(v)},grid:{color:'rgba(255,255,255,.05)'}},y:{ticks:{color:'#d4d2cc',font:{size:11}},grid:{display:false}}}}}));
+}
+
+// ── INIT ───────────────────────────────────────────────────────
+
 </script>
 </body>
 </html>
