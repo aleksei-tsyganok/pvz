@@ -624,7 +624,7 @@ window.addEventListener('DOMContentLoaded',async()=>{
     updLbl();
     await loadAllMonths();
     await load();
-    await drawDash();
+    await _drawDashAsync();
     buildCatGrid();
   }catch(e){
     document.getElementById('boot').innerHTML=`<div style="color:var(--rd);text-align:center;padding:32px">Ошибка: ${e.message}<br><small style="color:var(--mu)">Отключите RLS в Supabase SQL Editor</small></div>`;
@@ -675,7 +675,7 @@ async function loadRange(monthList){
   const filtered=allMonths.filter(m=>wanted.has(m.year+'-'+m.month));
   if(!filtered.length){allInc=[];allExp=[];return;}
   const mids=filtered.map(m=>m.id);
-  const midMap=Object.fromEntries(filtered.map(m=>[m.id,{year:m.year,month:m.month}]));
+  const midMap=Object.fromEntries(filtered.map(m=>[m.id,{year:Number(m.year),month:Number(m.month)}]));
   const [ir,er]=await Promise.all([
     db.from('income_entries').select('*').in('month_id',mids),
     db.from('expense_entries').select('*').in('month_id',mids),
@@ -689,7 +689,7 @@ async function loadAllMonths(){
   const {data:allMonthsData}=await db.from('months').select('*').order('year').order('month');
   if(!allMonthsData||!allMonthsData.length){allInc=[];allExp=[];return;}
   const mids=allMonthsData.map(m=>m.id);
-  const midMap=Object.fromEntries(allMonthsData.map(m=>[m.id,{year:m.year,month:m.month}]));
+  const midMap=Object.fromEntries(allMonthsData.map(m=>[m.id,{year:Number(m.year),month:Number(m.month)}]));
   const [ir,er]=await Promise.all([
     db.from('income_entries').select('*').in('month_id',mids),
     db.from('expense_entries').select('*').in('month_id',mids),
@@ -748,7 +748,8 @@ function expByCat(rows){
 }
 
 // ── DASHBOARD ─────────────────────────────────────────────────
-async function drawDash(){
+function drawDash(){return _drawDashAsync().catch(e=>console.error('drawDash error:',e));}
+async function _drawDashAsync(){
   const v=vp();
   // Для таблицы и alltime — считаем из allInc/allExp (все данные)
   // Для остальных видов — из inc/exp (текущий период)
@@ -909,8 +910,8 @@ function renderMultiMonthView(v, n){
   // Считаем суммарные данные за весь период для каждого пункта
   function ptCalc(p){
     const allowed=ptCatSettings[p.id];
-    const pInc=allInc.filter(e=>e.point_id===p.id&&months.some(m=>m.month===e._month&&m.year===e._year)&&(allowed===undefined||BASE_CATS.includes(e.category)||allowed.includes(e.category)));
-    const pExp=allExp.filter(e=>e.point_id===p.id&&months.some(m=>m.month===e._month&&m.year===e._year));
+    const pInc=allInc.filter(e=>e.point_id===p.id&&months.some(m=>Number(m.month)===Number(e._month)&&Number(m.year)===Number(e._year))&&(allowed===undefined||BASE_CATS.includes(e.category)||allowed.includes(e.category)));
+    const pExp=allExp.filter(e=>e.point_id===p.id&&months.some(m=>Number(m.month)===Number(e._month)&&Number(m.year)===Number(e._year)));
     const iM=pInc.reduce((s,e)=>s+Number(e.amount),0);
     const xM=pExp.reduce((s,e)=>s+Number(e.amount),0);
     const tb=pInc.filter(e=>!e.tax_exempt).reduce((s,e)=>s+Number(e.amount),0);
@@ -1503,20 +1504,21 @@ function xCellKey(e,inp){
 async function setView(v){
   dashView=v;
   allInc=[];allExp=[];
-  if(v==='year'){
-    document.getElementById('dash').innerHTML='<div style="padding:40px;text-align:center;color:var(--mu)">Загрузка...</div>';
+  document.getElementById('dash').innerHTML='<div style="padding:40px;text-align:center;color:var(--mu)">Загрузка...</div>';
+  if(v==='home'){
+    await loadAllMonths();
+  } else if(v==='year'){
     await loadYear();
   } else if(v==='3m'||v==='6m'){
-    document.getElementById('dash').innerHTML='<div style="padding:40px;text-align:center;color:var(--mu)">Загрузка...</div>';
     await loadRange(getRangeMonths(v==='3m'?3:6));
   } else if(v==='table'){
-    document.getElementById('dash').innerHTML='<div style="padding:40px;text-align:center;color:var(--mu)">Загрузка...</div>';
     await loadAllMonths();
   } else if(v==='alltime'){
-    document.getElementById('dash').innerHTML='<div style="padding:40px;text-align:center;color:var(--mu)">Загрузка...</div>';
     await loadAllMonths();
+  } else {
+    await load();
   }
-  await drawDash();
+  await _drawDashAsync();
 }
 
 // ── POINT INTERACTIONS ─────────────────────────────────────────
@@ -1553,7 +1555,7 @@ function isCatFilled(v){
   // Иначе нужно смотреть в allInc/allExp
   const allSource=(c&&c.type==='expense')?allExp:allInc;
   const entries=allSource.length
-    ? allSource.filter(e=>e.category===v&&e._month===entryM&&e._year===entryY)
+    ? allSource.filter(e=>e.category===v&&Number(e._month)===Number(entryM)&&Number(e._year)===Number(entryY))
     : source.filter(e=>e.category===v);
   const filledIds=new Set(entries.map(e=>e.point_id));
   const filledCount=rel.filter(p=>filledIds.has(p.id)).length;
@@ -1625,7 +1627,7 @@ function buildEntryTbl(){
   // Уже внесённые данные за выбранный в попапе месяц (entryM/entryY)
   const existing={}, existingDates={}, existingNotes={};
   const allSource=isExp?allExp:allInc;
-  const monthSource=allSource.filter(e=>e.category===selCat&&e._month===entryM&&e._year===entryY);
+  const monthSource=allSource.filter(e=>e.category===selCat&&Number(e._month)===Number(entryM)&&Number(e._year)===Number(entryY));
   // Если allInc ещё не загружен — берём из inc/exp текущего месяца как фолбэк
   const sourceData=allSource.length?monthSource:(isExp?exp:inc).filter(e=>e.category===selCat&&(entryM===M&&entryY===Y));
   sourceData.forEach(e=>{
@@ -1903,7 +1905,7 @@ function hideEntry(){
 function onOverlayClick(e){if(e.target===document.getElementById('entry-modal'))hideEntry();}
 
 // ── NAV ──────────────────────────────────────────────────────
-function swTab(t){tab=t;open=null;document.querySelectorAll('.tab').forEach(el=>el.classList.toggle('on',el.dataset.t===t));drawDash()}
+function swTab(t){tab=t;open=null;document.querySelectorAll('.tab').forEach(el=>el.classList.toggle('on',el.dataset.t===t));drawDash();}
 function updLbl(){document.getElementById('plbl').textContent=MN[M-1]+' '+Y}
 async function shiftM(d){M+=d;if(M>12){M=1;Y++}if(M<1){M=12;Y--}updLbl();open=null;allInc=[];allExp=[];document.getElementById('dash').innerHTML='<div style="padding:40px;text-align:center;color:var(--mu)">Загрузка...</div>';await load();drawDash()}
 
@@ -2161,8 +2163,8 @@ async function renderHomeView(v){
 
   function ptNet(p, monthList){
     const allowed=ptCatSettings[p.id];
-    const mi=allInc.filter(e=>e.point_id===p.id&&monthList.some(m=>m.month===e._month&&m.year===e._year)&&(allowed===undefined||BASE_CATS.includes(e.category)||allowed.includes(e.category)));
-    const mx=allExp.filter(e=>e.point_id===p.id&&monthList.some(m=>m.month===e._month&&m.year===e._year));
+    const mi=allInc.filter(e=>e.point_id===p.id&&monthList.some(m=>Number(m.month)===Number(e._month)&&Number(m.year)===Number(e._year))&&(allowed===undefined||BASE_CATS.includes(e.category)||allowed.includes(e.category)));
+    const mx=allExp.filter(e=>e.point_id===p.id&&monthList.some(m=>Number(m.month)===Number(e._month)&&Number(m.year)===Number(e._year)));
     const iM=mi.reduce((s,e)=>s+Number(e.amount),0);
     const xM=mx.reduce((s,e)=>s+Number(e.amount),0);
     const tax=mi.filter(e=>!e.tax_exempt).reduce((s,e)=>s+Number(e.amount),0)*p.tax_rate;
@@ -2171,7 +2173,7 @@ async function renderHomeView(v){
 
   function ptExtraNet(p, monthList){
     const allowed=ptCatSettings[p.id];
-    const mi=allInc.filter(e=>e.point_id===p.id&&monthList.some(m=>m.month===e._month&&m.year===e._year)&&EXTRA_V.includes(e.category)&&(allowed===undefined||allowed.includes(e.category)));
+    const mi=allInc.filter(e=>e.point_id===p.id&&monthList.some(m=>Number(m.month)===Number(e._month)&&Number(m.year)===Number(e._year))&&EXTRA_V.includes(e.category)&&(allowed===undefined||allowed.includes(e.category)));
     const iM=mi.reduce((s,e)=>s+Number(e.amount),0);
     const tax=mi.filter(e=>!e.tax_exempt).reduce((s,e)=>s+Number(e.amount),0)*p.tax_rate;
     return iM-tax;
@@ -2182,24 +2184,123 @@ async function renderHomeView(v){
     return{top:sorted.slice(0,n), bottom:[...sorted].reverse().slice(0,n)};
   }
 
-  function renderRank(list){
-    if(!list.length) return '<div style="color:var(--mu2);font-size:12px;padding:8px 0">Нет данных</div>';
-    const maxAbs=Math.max(...list.map(x=>Math.abs(x.net)));
-    return list.map((x,i)=>{
-      const mpc2=x.p.marketplace==='yandex'?'my':x.p.marketplace==='ozon'?'mo':'mw';
-      const pct=maxAbs?Math.round(Math.abs(x.net)/maxAbs*100):0;
-      const col=x.net>=0?'var(--gr)':'var(--rd)';
-      return '<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--b)">'+
-        '<span style="font-size:10px;color:var(--mu2);width:14px;text-align:right">'+(i+1)+'</span>'+
-        '<span class="mt '+mpc2+'" style="font-size:9px">'+x.p.marketplace.toUpperCase()+'</span>'+
-        '<span class="gbadge b'+x.p.owner_group+'" style="font-size:9px">'+x.p.owner_group+'</span>'+
-        '<span style="font-size:11px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+x.p.address+'</span>'+
-        '<div style="width:60px;height:3px;background:var(--bg4);border-radius:2px;overflow:hidden;flex-shrink:0">'+
-          '<div style="width:'+pct+'%;height:100%;background:'+col+';border-radius:2px"></div>'+
+  function renderGroupRank(allPts, monthList){
+    const id='rank-chart-'+(_rankChartIdx++);
+    const groups=['A','AD','YM'];
+    const grpColors={'A':'#8e44c7','AD':'#3a9fbf','YM':'#b8960a'};
+    const grpLabels={'A':'А личные','AD':'А+Д партнёрские','YM':'ЯМ сеть'};
+
+    const data=groups.map(g=>{
+      const gpts=allPts.filter(p=>p.owner_group===g);
+      let net=0;
+      gpts.forEach(p=>{
+        const allowed=ptCatSettings[p.id];
+        const mi=allInc.filter(e=>e.point_id===p.id&&monthList.some(m=>Number(m.month)===Number(e._month)&&Number(m.year)===Number(e._year))&&(allowed===undefined||BASE_CATS.includes(e.category)||allowed.includes(e.category)));
+        const mx=allExp.filter(e=>e.point_id===p.id&&monthList.some(m=>Number(m.month)===Number(e._month)&&Number(m.year)===Number(e._year)));
+        const iM=mi.reduce((s,e)=>s+Number(e.amount),0);
+        const xM=mx.reduce((s,e)=>s+Number(e.amount),0);
+        const tax=mi.filter(e=>!e.tax_exempt).reduce((s,e)=>s+Number(e.amount),0)*p.tax_rate;
+        net+=iM-xM-tax;
+      });
+      return{g,net,color:grpColors[g],label:grpLabels[g],count:gpts.length,avg:gpts.length?Math.round(net/gpts.length):0};
+    }).filter(x=>x.net>0).sort((a,b)=>b.net-a.net);
+
+    if(!data.length) return '<div style="color:var(--mu2);font-size:12px;padding:20px 0;text-align:center">Нет данных</div>';
+    const total=data.reduce((s,x)=>s+x.net,0);
+
+    const listHtml=data.map(x=>{
+      const pct=total?Math.round(x.net/total*100):0;
+      return '<div style="display:flex;align-items:center;gap:7px;padding:6px 0;border-bottom:1px solid var(--b)">'+
+        '<div style="width:10px;height:10px;border-radius:2px;background:'+x.color+';flex-shrink:0"></div>'+
+        '<span class="gbadge b'+x.g+'" style="font-size:9px;flex-shrink:0">'+x.g+'</span>'+
+        '<div style="flex:1;min-width:0">'+
+          '<div style="font-size:11px;color:var(--tx)">'+x.label+'</div>'+
+          '<div style="font-size:10px;color:var(--mu)">'+x.count+' пункт. · ср. '+fmt(x.avg)+'</div>'+
         '</div>'+
-        '<span style="font-size:11px;font-weight:600;color:'+col+';width:80px;text-align:right;flex-shrink:0">'+fmt(x.net)+'</span>'+
+        '<span style="font-size:12px;font-weight:600;color:'+x.color+';white-space:nowrap;margin-left:8px">'+fmt(x.net)+'</span>'+
+        '<span style="font-size:10px;color:var(--mu);width:30px;text-align:right;flex-shrink:0">'+pct+'%</span>'+
       '</div>';
     }).join('');
+
+    window._rankCharts=window._rankCharts||{};
+    setTimeout(()=>{
+      const el=document.getElementById(id);
+      if(!el)return;
+      if(window._rankCharts[id])window._rankCharts[id].destroy();
+      window._rankCharts[id]=new Chart(el,{
+        type:'doughnut',
+        data:{labels:data.map(x=>x.label),datasets:[{data:data.map(x=>Math.round(x.net)),backgroundColor:data.map(x=>x.color),borderWidth:3,borderColor:'#141414',hoverOffset:8}]},
+        options:{responsive:true,maintainAspectRatio:false,cutout:'50%',
+          plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.label+': '+fmt(c.parsed)+' ('+Math.round(c.parsed/total*100)+'%)'}}}
+        }
+      });
+    },80);
+
+    return '<div style="display:flex;gap:20px;align-items:flex-start">'+
+      '<div style="position:relative;width:160px;height:160px;flex-shrink:0"><canvas id="'+id+'"></canvas></div>'+
+      '<div style="flex:1;min-width:0;align-self:center">'+listHtml+'</div>'+
+    '</div>';
+  }
+
+  // Уникальные цвета для пунктов (достаточно контрастные)
+  const PT_COLORS=[
+    '#4e9af1','#f1914e','#4ef1a0','#f14e6e','#d4f14e',
+    '#9b4ef1','#4ef1e8','#f1c84e','#f14eb5','#7af14e',
+    '#f16b4e','#4e7af1','#f1e84e','#4ef16b'
+  ];
+
+  let _rankChartIdx=0;
+  function renderRank(allPts, monthList){
+    const id='rank-chart-'+(_rankChartIdx++);
+    // Считаем прибыль каждого пункта за период
+    const data=allPts.map((p,i)=>{
+      const allowed=ptCatSettings[p.id];
+      const mi=allInc.filter(e=>e.point_id===p.id&&monthList.some(m=>Number(m.month)===Number(e._month)&&Number(m.year)===Number(e._year))&&(allowed===undefined||BASE_CATS.includes(e.category)||allowed.includes(e.category)));
+      const mx=allExp.filter(e=>e.point_id===p.id&&monthList.some(m=>Number(m.month)===Number(e._month)&&Number(m.year)===Number(e._year)));
+      const iM=mi.reduce((s,e)=>s+Number(e.amount),0);
+      const xM=mx.reduce((s,e)=>s+Number(e.amount),0);
+      const tax=mi.filter(e=>!e.tax_exempt).reduce((s,e)=>s+Number(e.amount),0)*p.tax_rate;
+      return{p,net:iM-xM-tax,color:PT_COLORS[i%PT_COLORS.length]};
+    }).filter(x=>x.net>0).sort((a,b)=>b.net-a.net);
+
+    if(!data.length) return '<div style="color:var(--mu2);font-size:12px;padding:20px 0;text-align:center">Нет данных</div>';
+    const total=data.reduce((s,x)=>s+x.net,0);
+
+    const listHtml=data.map((x,i)=>{
+      const pct=total?Math.round(x.net/total*100):0;
+      const addr=x.p.address;
+      const mpc2=x.p.marketplace==='yandex'?'my':x.p.marketplace==='ozon'?'mo':'mw';
+      return '<div style="display:flex;align-items:center;gap:7px;padding:5px 0;border-bottom:1px solid var(--b)">'+
+        '<div style="width:9px;height:9px;border-radius:2px;background:'+x.color+';flex-shrink:0"></div>'+
+        '<span class="mt '+mpc2+'" style="font-size:8px;flex-shrink:0">'+x.p.marketplace.toUpperCase()+'</span>'+
+        '<span class="gbadge b'+x.p.owner_group+'" style="font-size:8px;flex-shrink:0">'+x.p.owner_group+'</span>'+
+        '<span style="font-size:11px;color:var(--tx);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+addr+'</span>'+
+        '<span style="font-size:11px;font-weight:600;color:'+x.color+';white-space:nowrap;margin-left:8px">'+fmt(x.net)+'</span>'+
+        '<span style="font-size:10px;color:var(--mu);width:30px;text-align:right;flex-shrink:0">'+pct+'%</span>'+
+      '</div>';
+    }).join('');
+
+    window._rankCharts=window._rankCharts||{};
+    setTimeout(()=>{
+      const el=document.getElementById(id);
+      if(!el)return;
+      if(window._rankCharts[id])window._rankCharts[id].destroy();
+      window._rankCharts[id]=new Chart(el,{
+        type:'doughnut',
+        data:{
+          labels:data.map(x=>x.p.address),
+          datasets:[{data:data.map(x=>Math.round(x.net)),backgroundColor:data.map(x=>x.color),borderWidth:3,borderColor:'#141414',hoverOffset:8}]
+        },
+        options:{responsive:true,maintainAspectRatio:false,cutout:'50%',
+          plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.label+': '+fmt(c.parsed)+' ('+Math.round(c.parsed/total*100)+'%)'}}}
+        }
+      });
+    },80);
+
+    return '<div style="display:flex;gap:20px;align-items:flex-start">'+
+      '<div style="position:relative;width:160px;height:160px;flex-shrink:0"><canvas id="'+id+'"></canvas></div>'+
+      '<div style="flex:1;min-width:0;align-self:center">'+listHtml+'</div>'+
+    '</div>';
   }
 
   function renderExtraRank(pts, monthList){
@@ -2209,7 +2310,7 @@ async function renderHomeView(v){
       const allowed=ptCatSettings[p.id];
       EXTRA_V.forEach(cv=>{
         if(allowed!==undefined&&!allowed.includes(cv)) return;
-        const mi=allInc.filter(e=>e.point_id===p.id&&monthList.some(m=>m.month===e._month&&m.year===e._year)&&e.category===cv);
+        const mi=allInc.filter(e=>e.point_id===p.id&&monthList.some(m=>Number(m.month)===Number(e._month)&&Number(m.year)===Number(e._year))&&e.category===cv);
         const iM=mi.reduce((s,e)=>s+Number(e.amount),0);
         const tax=mi.filter(e=>!e.tax_exempt).reduce((s,e)=>s+Number(e.amount),0)*p.tax_rate;
         if(iM>0){
@@ -2236,9 +2337,33 @@ async function renderHomeView(v){
     }).join('');
   }
 
+  _rankChartIdx=0; // сбрасываем счётчик canvas id при каждом рендере
   const pm1=[{month:pm,year:py}];
   const {top:top1m,bottom:bot1m}=topBottom(v,pm1);
   const {top:top3m,bottom:bot3m}=topBottom(v,months3);
+
+  // Данные для графика за всё время
+  const monthSet=new Set();
+  [...allInc,...allExp].forEach(e=>{if(e._year&&e._month)monthSet.add(e._year+'-'+String(e._month).padStart(2,'0'));});
+  const sortedMonths=Array.from(monthSet).sort();
+  const MNS2=['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'];
+  const chartLabels=sortedMonths.map(k=>{const[y,m]=k.split('-');return MNS2[parseInt(m)-1]+' '+y.slice(2);});
+  const chartInc=[],chartNet=[];
+  sortedMonths.forEach(key=>{
+    const[yr,mo]=key.split('-').map(Number);
+    let inc=0,ex=0,tax=0;
+    v.forEach(p=>{
+      const allowed=ptCatSettings[p.id];
+      const mi=allInc.filter(e=>e.point_id===p.id&&Number(e._year)===yr&&Number(e._month)===mo&&(allowed===undefined||BASE_CATS.includes(e.category)||allowed.includes(e.category)));
+      const mx=allExp.filter(e=>e.point_id===p.id&&Number(e._year)===yr&&Number(e._month)===mo);
+      inc+=mi.reduce((s,e)=>s+Number(e.amount),0);
+      ex+=mx.reduce((s,e)=>s+Number(e.amount),0);
+      tax+=mi.filter(e=>!e.tax_exempt).reduce((s,e)=>s+Number(e.amount),0)*p.tax_rate;
+    });
+    chartInc.push(Math.round(inc));
+    chartNet.push(Math.round(inc-ex-tax));
+  });
+  window._homeChartData={chartLabels,chartInc,chartNet};
 
   function card(title, content){
     return '<div style="background:var(--bg2);border:1px solid var(--b);border-radius:12px;padding:14px 16px">'+
@@ -2249,17 +2374,22 @@ async function renderHomeView(v){
 
   const s1='<div style="font-size:11px;font-weight:600;color:var(--mu);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">';
   const s2='</div>';
+  const grid1='<div style="display:grid;grid-template-columns:1fr;gap:12px;margin-bottom:20px">';
   const grid='<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px">';
   return (
-    s1+pmLabel+s2+
+    '<div style="background:var(--bg2);border:1px solid var(--b);border-radius:12px;padding:16px;margin-bottom:20px">'+
+      '<div style="font-size:11px;font-weight:600;color:var(--mu);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px">Доход и прибыль за всё время</div>'+
+      '<div style="position:relative;height:200px"><canvas id="chart-home-main"></canvas></div>'+
+    '</div>'+
+    s1+pmLabel+' · '+m3Label+s2+
     grid+
-      card('🏆 Топ-5 по прибыли',renderRank(top1m))+
-      card('📉 Низкая прибыль',renderRank(bot1m))+
+      card('📊 '+pmLabel, renderRank(v,pm1))+
+      card('📊 '+m3Label, renderRank(v,months3))+
     s2+
-    s1+m3Label+s2+
+    s1+'Прибыль по группам'+s2+
     grid+
-      card('🏆 Топ-5 по прибыли',renderRank(top3m))+
-      card('📉 Низкая прибыль',renderRank(bot3m))+
+      card('📊 '+pmLabel, renderGroupRank(v,pm1))+
+      card('📊 '+m3Label, renderGroupRank(v,months3))+
     s2+
     s1+'Топ допов'+s2+
     grid+
@@ -2285,6 +2415,20 @@ function renderHomeCharts(){
   if(window._homeCharts){window._homeCharts.forEach(c=>c.destroy());}
   window._homeCharts=[];
   const fR=v=>(v<0?'-':'')+new Intl.NumberFormat('ru-RU').format(Math.abs(Math.round(v)))+'\u202f\u20bd';
+
+  const elMain=document.getElementById('chart-home-main');
+  if(elMain) window._homeCharts.push(new Chart(elMain,{
+    type:'bar',
+    data:{labels:d.chartLabels,datasets:[
+      {label:'Доход',data:d.chartInc,backgroundColor:'rgba(26,111,181,.5)',order:2},
+      {label:'Прибыль',data:d.chartNet,type:'line',borderColor:'#2a9d4e',backgroundColor:'rgba(42,157,78,.08)',fill:true,tension:.3,pointRadius:2,order:1,
+        segment:{borderColor:ctx=>ctx.p0.parsed.y<0||ctx.p1.parsed.y<0?'#c0392b':'#2a9d4e'}}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:true,position:'top',labels:{color:'#6a6864',font:{size:11},boxWidth:12}},tooltip:{callbacks:{label:c=>c.dataset.label+': '+fR(c.parsed.y)}}},
+      scales:{y:{ticks:{color:'#6a6864',callback:v=>fR(v)},grid:{color:'rgba(255,255,255,.05)'}},x:{ticks:{color:'#6a6864',maxTicksLimit:12},grid:{display:false}}}
+    }
+  }));
 
   const n=document.getElementById('chart-home-net');
   if(n) window._homeCharts.push(new Chart(n,{type:'line',data:{labels:d.labels,datasets:[{label:'Прибыль',data:d.netSeries,borderColor:'#2a9d4e',backgroundColor:'rgba(42,157,78,.07)',fill:true,tension:.3,pointRadius:2,segment:{borderColor:ctx=>ctx.p0.parsed.y<0||ctx.p1.parsed.y<0?'#c0392b':'#2a9d4e'}}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>fR(c.parsed.y)}}},scales:{y:{ticks:{color:'#6a6864',callback:v=>fR(v)},grid:{color:'rgba(255,255,255,.05)'}},x:{ticks:{color:'#6a6864',maxTicksLimit:12},grid:{display:false}}}}}));
