@@ -489,30 +489,52 @@ body{background:var(--bg);background-image:radial-gradient(ellipse at 20% 0%,rgb
   .add-form select,.add-form input{width:100%!important;min-width:0!important;flex:none}
   .sbtn{width:100%;padding:8px;margin-top:2px}
 
-  /* ── ALL DATA TABLES: меньше паддингов, явный скролл-намёк ── */
+  /* ── ALL DATA TABLES ──────────────────────────────────────── */
   .ftbl-wrap{
-    margin:0 -10px;
+    margin:0 -12px;
     padding:0;
     border-radius:0;
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
   }
-  .ftbl{font-size:11px;min-width:500px}
+  /* Липкий заголовок с датами */
   .ftbl thead th{
-    padding:6px 8px;font-size:9px;white-space:nowrap;
-    position:sticky;top:0;z-index:5;background:var(--bg);
+    position:sticky;top:0;z-index:5;
+    background:var(--bg3);
+    padding:5px 6px;
+    font-size:9px;
+    white-space:nowrap;
+    min-width:52px;
   }
-  .ftbl td{padding:5px 8px;font-size:11px}
-  .ftbl td:first-child,.ftbl thead th:first-child{
+  /* Липкая первая колонка */
+  .ftbl td:first-child,
+  .ftbl thead th:first-child{
     position:sticky;left:0;z-index:10;
     background:var(--bg2);
-    min-width:110px;max-width:140px;
-    font-size:10px;
+    min-width:100px;max-width:120px;
+    font-size:10px;padding:4px 6px;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
   }
-  .ftbl thead th:first-child{z-index:20;background:var(--bg)}
-  .frow-point td:first-child{background:var(--bg3)!important}
-  .ftbl .frow-point td{padding:6px 8px;font-size:11px}
-  .ftbl .frow-point .mt{font-size:8px;padding:1px 4px}
-  .ftbl .frow-point .gbadge{font-size:8px;padding:1px 5px}
+  .ftbl thead th:first-child{z-index:20;background:var(--bg3)}
+  /* Обычные ячейки — компактно */
+  .ftbl td{padding:4px 6px;font-size:10px}
+  /* Шапка пункта — компактная однострочная */
+  .ftbl .frow-point td{
+    padding:5px 8px;
+    font-size:10px;font-weight:600;
+    background:var(--bg3)!important;
+  }
+  .ftbl .frow-point td:first-child{background:var(--bg3)!important;font-size:10px}
+  .ftbl .frow-point .mt{font-size:8px;padding:1px 3px}
+  .ftbl .frow-point .gbadge{display:none} /* скрываем badge группы — экономим место */
+  /* Секция доходы/расходы */
+  .ftbl .frow-sec td{padding:3px 6px;font-size:9px}
+  /* Итоговые строки */
+  .ftbl .frow-sum td,.ftbl .frow-grand td{padding:4px 6px;font-size:10px}
+  /* Скрываем кнопку добавления месяца */
   .th-add-month,.td-add{display:none}
+  /* Итого по группе */
+  .ftbl .frow-grp td{padding:4px 6px;font-size:10px}
 
   /* ── MODAL (попап «Внести данные»): почти fullscreen ─────── */
   .modal-ov{padding:0;align-items:flex-end}
