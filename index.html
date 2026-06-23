@@ -89,6 +89,9 @@ body{background:var(--bg);color:var(--tx);font:13px/1.5 system-ui,sans-serif;min
 .pth span:not(:first-child){text-align:right}
 .pr{border-bottom:1px solid var(--b)}.pr:last-child{border-bottom:none}
 .pm{display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr 20px;align-items:center;padding:8px 14px;cursor:pointer;transition:background .1s}
+.pm .pn{display:block!important}
+.pm .xi{display:block!important}
+.pm-row-nums{display:none}
 .pm:hover{background:rgba(255,255,255,.02)}
 .pi{display:flex;align-items:center;gap:7px}
 .mt{font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px}
@@ -408,14 +411,21 @@ body{background:var(--bg);color:var(--tx);font:13px/1.5 system-ui,sans-serif;min
   .gst{font-size:11px;flex-basis:100%}
 
   /* ── POINT CARD: схлопываем колонки ──────────────────────── */
-  .pth{display:none} /* заголовки колонок прячем — и так понятно по подписям внутри */
+  .pth{display:none}
+  /* Карточка пункта — вертикальный стек на мобильном */
   .pm{
-    grid-template-columns:1fr auto 18px;
-    gap:8px;padding:11px 12px;
+    display:flex!important;
+    flex-direction:column;
+    padding:10px 12px;
+    gap:6px;
   }
-  .pm .pn:nth-child(2),.pm .pn:nth-child(3){display:none} /* прячем доход/налог в свёрнутом виде, оставляем только прибыль */
-  .pm .pn:nth-child(4){font-size:14px;font-weight:600} /* прибыль крупнее */
-  .pa{font-size:12.5px}
+  .pm .pn{display:none!important}
+  .pm .xi{display:none!important}
+  .pm-row-nums{display:grid!important}
+  .pm-num-cell{display:flex;flex-direction:column;gap:1px}
+  .pm-num-lbl{font-size:9px;color:var(--mu);text-transform:uppercase;letter-spacing:.04em}
+  .pm-num-val{font-size:12px;font-weight:600}
+  .pa{font-size:13px}
   .mt{font-size:8px;padding:2px 5px}
 
   /* ── POINT DETAIL: уже адаптивен через flex-wrap ─────────── */
@@ -852,12 +862,20 @@ function renderMonthView(v){
       const at=(addState[p.id]||{type:'income'}).type;
       const cats=at==='income'?CATS.filter(c=>c.type==='income'):CATS.filter(c=>c.type==='expense');
       h+=`<div class="pr"><div class="pm" onclick="tog('${p.id}')">
-        <div class="pi"><span class="mt ${mpc(p.marketplace)}">${p.marketplace.toUpperCase()}</span><span class="pa">${p.address}</span></div>
-        <div class="pn" style="color:var(--tx)">${fmt(s.iM)}</div>
-        <div class="pn" style="color:var(--mu)">${s.xM?fmt(s.xM):'—'}</div>
-        <div class="pn" style="color:var(--mu)">${s.tax?fmt(s.tax):'—'}</div>
-        <div class="pn ${cc(s.net)}" style="font-weight:600">${fmt(s.net)}</div>
-        <div class="xi">${isO?'▲':'▼'}</div>
+        <div class="pi"><span class="mt ${mpc(p.marketplace)}">${p.marketplace.toUpperCase()}</span><span class="pa">${p.address}</span>
+          <span class="xi" style="margin-left:auto">${isO?'▲':'▼'}</span>
+        </div>
+        <div class="pm-row-nums">
+          <div class="pm-num-cell"><span class="pm-num-lbl">Доход</span><span class="pm-num-val">${fmt(s.iM)}</span></div>
+          <div class="pm-num-cell"><span class="pm-num-lbl">Расход</span><span class="pm-num-val" style="color:var(--mu)">${s.xM?fmt(s.xM):'—'}</span></div>
+          <div class="pm-num-cell"><span class="pm-num-lbl">Налог</span><span class="pm-num-val" style="color:var(--mu)">${s.tax?fmt(s.tax):'—'}</span></div>
+          <div class="pm-num-cell"><span class="pm-num-lbl">Прибыль</span><span class="pm-num-val ${cc(s.net)}">${fmt(s.net)}</span></div>
+        </div>
+        <div class="pn" style="color:var(--tx);display:none">${fmt(s.iM)}</div>
+        <div class="pn" style="color:var(--mu);display:none">${s.xM?fmt(s.xM):'—'}</div>
+        <div class="pn" style="color:var(--mu);display:none">${s.tax?fmt(s.tax):'—'}</div>
+        <div class="pn ${cc(s.net)}" style="font-weight:600;display:none">${fmt(s.net)}</div>
+        <div class="xi" style="display:none">${isO?'▲':'▼'}</div>
       </div>`;
       if(isO){
         const icat=incByCat(s.iRows);
@@ -963,11 +981,17 @@ function renderMultiMonthView(v, n){
       const mpc2=p.marketplace==='yandex'?'my':p.marketplace==='ozon'?'mo':'mw';
       h+=`<div class="pr"><div class="pm" onclick="void(0)">
         <div class="pi"><span class="mt ${mpc2}">${p.marketplace.toUpperCase()}</span><span class="pa">${p.address}</span></div>
-        <div class="pn" style="color:var(--tx)">${fmt(s.iM)}</div>
-        <div class="pn" style="color:var(--mu)">${s.xM?fmt(s.xM):'—'}</div>
-        <div class="pn" style="color:var(--mu)">${s.tax?fmt(s.tax):'—'}</div>
-        <div class="pn ${cc(s.net)}" style="font-weight:600">${fmt(s.net)}</div>
-        <div class="xi">▼</div>
+        <div class="pm-row-nums">
+          <div class="pm-num-cell"><span class="pm-num-lbl">Доход</span><span class="pm-num-val">${fmt(s.iM)}</span></div>
+          <div class="pm-num-cell"><span class="pm-num-lbl">Расход</span><span class="pm-num-val" style="color:var(--mu)">${s.xM?fmt(s.xM):'—'}</span></div>
+          <div class="pm-num-cell"><span class="pm-num-lbl">Налог</span><span class="pm-num-val" style="color:var(--mu)">${s.tax?fmt(s.tax):'—'}</span></div>
+          <div class="pm-num-cell"><span class="pm-num-lbl">Прибыль</span><span class="pm-num-val ${cc(s.net)}">${fmt(s.net)}</span></div>
+        </div>
+        <div class="pn" style="color:var(--tx);display:none">${fmt(s.iM)}</div>
+        <div class="pn" style="color:var(--mu);display:none">${s.xM?fmt(s.xM):'—'}</div>
+        <div class="pn" style="color:var(--mu);display:none">${s.tax?fmt(s.tax):'—'}</div>
+        <div class="pn ${cc(s.net)}" style="font-weight:600;display:none">${fmt(s.net)}</div>
+        <div class="xi" style="display:none">▼</div>
       </div></div>`;
     });
     h+=`</div></div>`;
