@@ -17,7 +17,7 @@
   --gr-soft:rgba(52,199,89,.18);--rd-soft:rgba(255,69,58,.15);
   --am-soft:rgba(255,159,10,.15);
 }
-body{background:var(--bg);color:var(--tx);font:13px/1.5 system-ui,sans-serif;min-height:100vh}
+body{background:var(--bg);background-image:radial-gradient(ellipse at 20% 0%,rgba(142,68,199,.07) 0%,transparent 50%),radial-gradient(ellipse at 80% 100%,rgba(58,159,191,.06) 0%,transparent 50%);color:var(--tx);font:13px/1.5 system-ui,sans-serif;min-height:100vh}
 #boot{display:flex;align-items:center;justify-content:center;min-height:100vh;flex-direction:column;gap:12px}
 .spin{width:28px;height:28px;border:2px solid var(--b2);border-top-color:var(--gr);border-radius:50%;animation:sp .7s linear infinite}
 @keyframes sp{to{transform:rotate(360deg)}}
@@ -84,6 +84,17 @@ body{background:var(--bg);color:var(--tx);font:13px/1.5 system-ui,sans-serif;min
 
 /* POINT CARD */
 .ptw{background:var(--bg2);border:1px solid var(--b);border-radius:10px;overflow:hidden;margin-bottom:6px}
+/* ── КАРТОЧКИ ПУНКТОВ ───────────────────────────────────── */
+.pt-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px;margin-bottom:10px}
+.pt-card{background:var(--bg2);border:1px solid var(--b);border-radius:10px;padding:12px 14px;cursor:pointer;transition:background .15s}
+.pt-card:hover{background:var(--bg3)}
+.pt-card.open{background:var(--bg3)}
+.pt-card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:8px}
+.pt-card-profit{font-size:16px;font-weight:700;flex-shrink:0}
+.pt-card-nums{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
+.pt-card-num{display:flex;flex-direction:column;gap:2px}
+.pt-card-lbl{font-size:9px;color:var(--mu);text-transform:uppercase;letter-spacing:.05em}
+.pt-card-num>span:last-child{font-size:12px;font-weight:500}
 .pth{display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr 20px;padding:6px 14px;background:var(--bg3);border-bottom:1px solid var(--b)}
 .pth span{font-size:10px;font-weight:600;color:var(--mu);text-transform:uppercase;letter-spacing:.05em}
 .pth span:not(:first-child){text-align:right}
@@ -851,36 +862,25 @@ function renderMonthView(v){
       <span class="gbadge b${g}">${g}</span><span class="gn">${gi.l}</span><span class="gs1"></span>
       <span class="gst">доход <b style="color:${gi.c}">${fmt(gI)}</b> · прибыль <b class="${cc(gN)}">${fmt(gN)}</b></span>
     </div>
-    <div class="ptw"><div class="pth">
-      <span>Пункт</span>
-      <span style="color:var(--tx)">Доход</span>
-      <span>Расход</span>
-      <span>Налог</span>
-      <span>Прибыль</span>
-      <span></span>
-    </div>`;
+    <div class="pt-cards">`;
     gp.forEach(p=>{
       const s=ps(p,inc,exp);
       const isO=open===p.id;
-      const at=(addState[p.id]||{type:'income'}).type;
-      const cats=at==='income'?CATS.filter(c=>c.type==='income'):CATS.filter(c=>c.type==='expense');
-      h+=`<div class="pr pr-${g}"><div class="pm" onclick="tog('${p.id}')">
-        <div class="pi"><span class="mt ${mpc(p.marketplace)}">${p.marketplace.toUpperCase()}</span><span class="pa">${p.address}</span>
-          <span class="xi" style="margin-left:auto">${isO?'▲':'▼'}</span>
+      const borderCol=s.net>=0?'var(--gr)':'var(--rd)';
+      const grpGrad={'A':'rgba(142,68,199,.13)','AD':'rgba(58,159,191,.13)','YM':'rgba(184,150,10,.13)'}[g]||'transparent';
+      h+=`<div class="pt-card${isO?' open':''}" style="border-left:3px solid ${borderCol};background:linear-gradient(135deg,${grpGrad} 0%,var(--bg2) 60%)">
+        <div class="pt-card-head" onclick="tog('${p.id}')">
+          <div class="pi"><span class="mt ${mpc(p.marketplace)}">${p.marketplace.toUpperCase()}</span><span class="pa">${p.address}</span></div>
+          <span class="pt-card-profit ${cc(s.net)}">${fmt(s.net)}</span>
         </div>
-        <div class="pm-row-nums">
-          <div class="pm-num-cell"><span class="pm-num-lbl">Доход</span><span class="pm-num-val">${fmt(s.iM)}</span></div>
-          <div class="pm-num-cell"><span class="pm-num-lbl">Расход</span><span class="pm-num-val" style="color:var(--mu)">${s.xM?fmt(s.xM):'—'}</span></div>
-          <div class="pm-num-cell"><span class="pm-num-lbl">Налог</span><span class="pm-num-val" style="color:var(--mu)">${s.tax?fmt(s.tax):'—'}</span></div>
-          <div class="pm-num-cell"><span class="pm-num-lbl">Прибыль</span><span class="pm-num-val ${cc(s.net)}">${fmt(s.net)}</span></div>
-        </div>
-        <div class="pn" style="color:var(--tx);display:none">${fmt(s.iM)}</div>
-        <div class="pn" style="color:var(--mu);display:none">${s.xM?fmt(s.xM):'—'}</div>
-        <div class="pn" style="color:var(--mu);display:none">${s.tax?fmt(s.tax):'—'}</div>
-        <div class="pn ${cc(s.net)}" style="font-weight:600;display:none">${fmt(s.net)}</div>
-        <div class="xi" style="display:none">${isO?'▲':'▼'}</div>
-      </div>`;
+        <div class="pt-card-nums">
+          <div class="pt-card-num"><span class="pt-card-lbl">Доход</span><span>${fmt(s.iM)}</span></div>
+          <div class="pt-card-num"><span class="pt-card-lbl">Расход</span><span style="color:var(--mu)">${fmt(s.xM)}</span></div>
+          <div class="pt-card-num"><span class="pt-card-lbl">Налог</span><span style="color:var(--am)">${fmt(s.tax)}</span></div>
+        </div>`;
       if(isO){
+        const at=(addState[p.id]||{type:'income'}).type;
+        const cats=at==='income'?CATS.filter(c=>c.type==='income'):CATS.filter(c=>c.type==='expense');
         const icat=incByCat(s.iRows);
         const xcat=expByCat(s.xRows);
         h+=`<div class="pd open">
@@ -892,27 +892,11 @@ function renderMonthView(v){
             <button class="arch-rb" onclick="archP('${p.id}',${p.is_archived})">${p.is_archived?'↩ Восст.':'📦 Архив'}</button>
           </div>
           <div class="subcats">
-            <div class="subcat-col">
-              <h4>Доходы по категориям</h4>
-              ${Object.keys(icat).length?Object.entries(icat).map(([cat,v])=>`
-                <div class="sub-row">
-                  <span class="sub-lbl">${CL[cat]||cat}</span>
-                  <div class="sub-vals">
-                    <span class="sub-full">${fmt(v.my)}</span>
-                    <span class="sub-my" style="color:var(--gr)">(${fmt(v.my)})</span>
-                  </div>
-                </div>`).join(''):'<div style="color:var(--mu2);font-size:12px;padding:4px 0">Нет записей</div>'}
+            <div class="subcat-col"><h4>Доходы</h4>
+              ${Object.keys(icat).length?Object.entries(icat).map(([cat,v])=>`<div class="sub-row"><span class="sub-lbl">${CL[cat]||cat}</span><span class="sub-my" style="color:var(--gr)">${fmt(v.my)}</span></div>`).join(''):'<div style="color:var(--mu2);font-size:12px">Нет записей</div>'}
             </div>
-            <div class="subcat-col">
-              <h4>Расходы по категориям</h4>
-              ${Object.keys(xcat).length?Object.entries(xcat).map(([cat,v])=>`
-                <div class="sub-row">
-                  <span class="sub-lbl">${CL[cat]||cat}</span>
-                  <div class="sub-vals">
-                    <span class="sub-full">${fmt(v.my)}</span>
-                    <span class="sub-my" style="color:var(--rd)">(${fmt(v.my)})</span>
-                  </div>
-                </div>`).join(''):'<div style="color:var(--mu2);font-size:12px;padding:4px 0">Нет записей</div>'}
+            <div class="subcat-col"><h4>Расходы</h4>
+              ${Object.keys(xcat).length?Object.entries(xcat).map(([cat,v])=>`<div class="sub-row"><span class="sub-lbl">${CL[cat]||cat}</span><span class="sub-my" style="color:var(--rd)">${fmt(v.my)}</span></div>`).join(''):'<div style="color:var(--mu2);font-size:12px">Нет записей</div>'}
             </div>
           </div>
           <div class="add-section">
@@ -934,10 +918,12 @@ function renderMonthView(v){
       }
       h+=`</div>`;
     });
-    h+=`</div>`;
+    h+=`</div></div>`;
   });
   return h;
 }
+
+
 
 function renderMultiMonthView(v, n){
   const months=getRangeMonths(n);
@@ -970,32 +956,24 @@ function renderMultiMonthView(v, n){
       <span class="gbadge b${g}">${g}</span><span class="gn">${gi.l}</span><span class="gs1"></span>
       <span class="gst">доход <b style="color:${gi.c}">${fmt(gI)}</b> · прибыль <b class="${cc(gN)}">${fmt(gN)}</b></span>
     </div>
-    <div class="ptw"><div class="pth">
-      <span>Пункт</span>
-      <span style="color:var(--tx)">Доход</span>
-      <span>Расход</span>
-      <span>Налог</span>
-      <span>Прибыль</span>
-      <span></span>
-    </div>`;
+    <div class="pt-cards">`;
 
     gp.forEach(p=>{
       const s=ptCalc(p);
       const mpc2=p.marketplace==='yandex'?'my':p.marketplace==='ozon'?'mo':'mw';
-      h+=`<div class="pr pr-${g}"><div class="pm" onclick="void(0)">
-        <div class="pi"><span class="mt ${mpc2}">${p.marketplace.toUpperCase()}</span><span class="pa">${p.address}</span></div>
-        <div class="pm-row-nums">
-          <div class="pm-num-cell"><span class="pm-num-lbl">Доход</span><span class="pm-num-val">${fmt(s.iM)}</span></div>
-          <div class="pm-num-cell"><span class="pm-num-lbl">Расход</span><span class="pm-num-val" style="color:var(--mu)">${s.xM?fmt(s.xM):'—'}</span></div>
-          <div class="pm-num-cell"><span class="pm-num-lbl">Налог</span><span class="pm-num-val" style="color:var(--mu)">${s.tax?fmt(s.tax):'—'}</span></div>
-          <div class="pm-num-cell"><span class="pm-num-lbl">Прибыль</span><span class="pm-num-val ${cc(s.net)}">${fmt(s.net)}</span></div>
+      const borderCol=s.net>=0?'var(--gr)':'var(--rd)';
+      const grpGrad2={'A':'rgba(142,68,199,.13)','AD':'rgba(58,159,191,.13)','YM':'rgba(184,150,10,.13)'}[g]||'transparent';
+      h+=`<div class="pt-card" style="border-left:3px solid ${borderCol};background:linear-gradient(135deg,${grpGrad2} 0%,var(--bg2) 60%)">
+        <div class="pt-card-head">
+          <div class="pi"><span class="mt ${mpc2}">${p.marketplace.toUpperCase()}</span><span class="pa">${p.address}</span></div>
+          <span class="pt-card-profit ${cc(s.net)}">${fmt(s.net)}</span>
         </div>
-        <div class="pn" style="color:var(--tx);display:none">${fmt(s.iM)}</div>
-        <div class="pn" style="color:var(--mu);display:none">${s.xM?fmt(s.xM):'—'}</div>
-        <div class="pn" style="color:var(--mu);display:none">${s.tax?fmt(s.tax):'—'}</div>
-        <div class="pn ${cc(s.net)}" style="font-weight:600;display:none">${fmt(s.net)}</div>
-        <div class="xi" style="display:none">▼</div>
-      </div></div>`;
+        <div class="pt-card-nums">
+          <div class="pt-card-num"><span class="pt-card-lbl">Доход</span><span>${fmt(s.iM)}</span></div>
+          <div class="pt-card-num"><span class="pt-card-lbl">Расход</span><span style="color:var(--mu)">${fmt(s.xM)}</span></div>
+          <div class="pt-card-num"><span class="pt-card-lbl">Налог</span><span style="color:var(--am)">${fmt(s.tax)}</span></div>
+        </div>
+      </div>`;
     });
     h+=`</div></div>`;
   });
