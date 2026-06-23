@@ -435,7 +435,7 @@ body{background:var(--bg);background-image:radial-gradient(ellipse at 20% 0%,rgb
   .tabs{padding:0 10px}
   .tab{padding:8px 10px;font-size:12px}
 
-  .cnt{padding:10px}
+  .cnt{padding:10px;overflow-x:hidden}
 
   /* ── SUMMARY CARDS: уже 2 колонки, уменьшаем текст ───────── */
   .sum4{gap:8px;margin-bottom:14px}
@@ -491,50 +491,46 @@ body{background:var(--bg);background-image:radial-gradient(ellipse at 20% 0%,rgb
 
   /* ── ALL DATA TABLES ──────────────────────────────────────── */
   .ftbl-wrap{
-    margin:0 -12px;
-    padding:0;
-    border-radius:0;
-    overflow-x:auto;
-    -webkit-overflow-scrolling:touch;
+    margin:0 -12px!important;
+    padding:0!important;
+    border-radius:0!important;
+    overflow-x:auto!important;
+    -webkit-overflow-scrolling:touch!important;
+    max-width:calc(100vw)!important;
   }
   /* Липкий заголовок с датами */
   .ftbl thead th{
-    position:sticky;top:0;z-index:5;
-    background:var(--bg3);
-    padding:5px 6px;
-    font-size:9px;
-    white-space:nowrap;
-    min-width:52px;
+    position:sticky!important;top:0!important;z-index:5!important;
+    background:var(--bg3)!important;
+    padding:5px 6px!important;
+    font-size:9px!important;
+    white-space:nowrap!important;
+    min-width:52px!important;
   }
   /* Липкая первая колонка */
   .ftbl td:first-child,
   .ftbl thead th:first-child{
-    position:sticky;left:0;z-index:10;
-    background:var(--bg2);
-    min-width:100px;max-width:120px;
-    font-size:10px;padding:4px 6px;
-    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+    position:sticky!important;left:0!important;z-index:10!important;
+    background:var(--bg2)!important;
+    min-width:100px!important;max-width:120px!important;
+    font-size:10px!important;padding:4px 6px!important;
+    overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important;
   }
-  .ftbl thead th:first-child{z-index:20;background:var(--bg3)}
+  .ftbl thead th:first-child{z-index:20!important;background:var(--bg3)!important}
   /* Обычные ячейки — компактно */
-  .ftbl td{padding:4px 6px;font-size:10px}
-  /* Шапка пункта — компактная однострочная */
+  .ftbl td{padding:4px 6px!important;font-size:10px!important}
+  /* Шапка пункта */
   .ftbl .frow-point td{
-    padding:5px 8px;
-    font-size:10px;font-weight:600;
+    padding:5px 8px!important;
+    font-size:10px!important;font-weight:600!important;
     background:var(--bg3)!important;
   }
-  .ftbl .frow-point td:first-child{background:var(--bg3)!important;font-size:10px}
-  .ftbl .frow-point .mt{font-size:8px;padding:1px 3px}
-  .ftbl .frow-point .gbadge{display:none} /* скрываем badge группы — экономим место */
-  /* Секция доходы/расходы */
-  .ftbl .frow-sec td{padding:3px 6px;font-size:9px}
-  /* Итоговые строки */
-  .ftbl .frow-sum td,.ftbl .frow-grand td{padding:4px 6px;font-size:10px}
-  /* Скрываем кнопку добавления месяца */
-  .th-add-month,.td-add{display:none}
-  /* Итого по группе */
-  .ftbl .frow-grp td{padding:4px 6px;font-size:10px}
+  .ftbl .frow-point td:first-child{background:var(--bg3)!important;font-size:10px!important}
+  .ftbl .frow-point .mt{font-size:8px!important;padding:1px 3px!important}
+  .ftbl .frow-point .gbadge{display:none!important}
+  .ftbl .frow-sec td{padding:3px 6px!important;font-size:9px!important}
+  .ftbl .frow-sum td,.ftbl .frow-grand td{padding:4px 6px!important;font-size:10px!important}
+  .th-add-month,.td-add{display:none!important}
 
   /* ── MODAL (попап «Внести данные»): почти fullscreen ─────── */
   .modal-ov{padding:0;align-items:flex-end}
