@@ -88,6 +88,9 @@ body{background:var(--bg);color:var(--tx);font:13px/1.5 system-ui,sans-serif;min
 .pth span{font-size:10px;font-weight:600;color:var(--mu);text-transform:uppercase;letter-spacing:.05em}
 .pth span:not(:first-child){text-align:right}
 .pr{border-bottom:1px solid var(--b)}.pr:last-child{border-bottom:none}
+.pr-A{background:linear-gradient(135deg,rgba(142,68,199,.06),transparent)}
+.pr-AD{background:linear-gradient(135deg,rgba(58,159,191,.06),transparent)}
+.pr-YM{background:linear-gradient(135deg,rgba(184,150,10,.06),transparent)}
 .pm{display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr 20px;align-items:center;padding:8px 14px;cursor:pointer;transition:background .1s}
 .pm .pn{display:block!important}
 .pm .xi{display:block!important}
@@ -416,15 +419,15 @@ body{background:var(--bg);color:var(--tx);font:13px/1.5 system-ui,sans-serif;min
   .pm{
     display:flex!important;
     flex-direction:column;
-    padding:10px 12px;
-    gap:6px;
+    padding:8px 10px;
+    gap:4px;
   }
   .pm .pn{display:none!important}
   .pm .xi{display:none!important}
-  .pm-row-nums{display:grid!important}
+  .pm-row-nums{display:grid!important;grid-template-columns:1fr 1fr;gap:3px}
   .pm-num-cell{display:flex;flex-direction:column;gap:1px}
-  .pm-num-lbl{font-size:9px;color:var(--mu);text-transform:uppercase;letter-spacing:.04em}
-  .pm-num-val{font-size:12px;font-weight:600}
+  .pm-num-lbl{font-size:8px;color:var(--mu);text-transform:uppercase;letter-spacing:.04em}
+  .pm-num-val{font-size:11px;font-weight:600}
   .pa{font-size:13px}
   .mt{font-size:8px;padding:2px 5px}
 
@@ -781,7 +784,7 @@ async function _drawDashAsync(){
   const v=vp();
   // Для таблицы и alltime — считаем из allInc/allExp (все данные)
   // Для остальных видов — из inc/exp (текущий период)
-  const _useAll=dashView==='table';
+  const _useAll=dashView!=='month';
   const _inc=_useAll?allInc:inc;
   const _exp=_useAll?allExp:exp;
   const tI=v.reduce((s,p)=>s+ps(p,_inc,_exp).iM,0);
@@ -861,7 +864,7 @@ function renderMonthView(v){
       const isO=open===p.id;
       const at=(addState[p.id]||{type:'income'}).type;
       const cats=at==='income'?CATS.filter(c=>c.type==='income'):CATS.filter(c=>c.type==='expense');
-      h+=`<div class="pr"><div class="pm" onclick="tog('${p.id}')">
+      h+=`<div class="pr pr-${g}"><div class="pm" onclick="tog('${p.id}')">
         <div class="pi"><span class="mt ${mpc(p.marketplace)}">${p.marketplace.toUpperCase()}</span><span class="pa">${p.address}</span>
           <span class="xi" style="margin-left:auto">${isO?'▲':'▼'}</span>
         </div>
@@ -979,7 +982,7 @@ function renderMultiMonthView(v, n){
     gp.forEach(p=>{
       const s=ptCalc(p);
       const mpc2=p.marketplace==='yandex'?'my':p.marketplace==='ozon'?'mo':'mw';
-      h+=`<div class="pr"><div class="pm" onclick="void(0)">
+      h+=`<div class="pr pr-${g}"><div class="pm" onclick="void(0)">
         <div class="pi"><span class="mt ${mpc2}">${p.marketplace.toUpperCase()}</span><span class="pa">${p.address}</span></div>
         <div class="pm-row-nums">
           <div class="pm-num-cell"><span class="pm-num-lbl">Доход</span><span class="pm-num-val">${fmt(s.iM)}</span></div>
