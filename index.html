@@ -165,12 +165,46 @@ body{background:var(--bg);background-image:radial-gradient(ellipse at 20% 0%,rgb
 .modal-body{overflow-y:auto;flex:1}
 .ep-step{padding:14px 20px;border-bottom:1px solid var(--b)}
 .ep-lbl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--mu);margin-bottom:8px}
-.cat-grid{display:flex;flex-wrap:wrap;gap:8px}
+.cat-grid{display:flex;flex-wrap:wrap;gap:8px;align-items:start}
 .cat-section-lbl{font-size:10px;color:var(--mu);text-transform:uppercase;letter-spacing:.06em;width:100%;margin-top:8px;margin-bottom:4px}
 .cat-section-lbl:first-child{margin-top:0}
 .cat-tab.on{background:var(--bg3)!important;color:var(--tx)!important;border-color:var(--b2)!important}
 .cat-tab:hover{background:var(--bg3);color:var(--tx)}
-.cat-btn{padding:10px 16px;border-radius:9px;border:1px solid var(--b2);background:none;color:var(--tx);font-size:13px;cursor:pointer;transition:all .15s}
+.cat-btn{
+  padding:11px 18px;border-radius:12px;
+  border:1px solid var(--b2);
+  background:linear-gradient(135deg,rgba(255,255,255,.03) 0%,rgba(255,255,255,.01) 100%);
+  color:var(--tx);font-size:13px;font-weight:500;
+  cursor:pointer;transition:all .2s;
+  box-shadow:0 1px 3px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.04);
+  position:relative;overflow:hidden;
+}
+.cat-btn::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(255,255,255,.06) 0%,transparent 60%);
+  pointer-events:none;
+}
+.cat-btn:hover{
+  border-color:var(--b2);
+  background:linear-gradient(135deg,rgba(255,255,255,.07) 0%,rgba(255,255,255,.02) 100%);
+  transform:translateY(-1px);
+  box-shadow:0 4px 12px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.06);
+}
+.cat-btn.on{
+  border-color:var(--gr);
+  background:linear-gradient(135deg,rgba(42,157,78,.2) 0%,rgba(42,157,78,.08) 100%);
+  color:var(--gr);
+  box-shadow:0 0 0 1px rgba(42,157,78,.3),inset 0 1px 0 rgba(42,157,78,.15);
+}
+.cat-btn.filled{
+  border-color:rgba(42,157,78,.5);
+  background:linear-gradient(135deg,rgba(42,157,78,.12) 0%,rgba(42,157,78,.04) 100%);
+  box-shadow:0 1px 3px rgba(0,0,0,.3),inset 0 1px 0 rgba(42,157,78,.1);
+}
+.cat-btn.partial{
+  border-color:rgba(212,130,10,.4);
+  background:linear-gradient(135deg,rgba(212,130,10,.1) 0%,rgba(212,130,10,.03) 100%);
+}
 .cat-btn:hover{background:var(--bg3)}.cat-btn.on{background:var(--bg3);border-color:var(--gr);color:var(--gr)}
 .cat-btn.filled{border-color:rgba(42,157,78,.5);background:rgba(42,157,78,.08)}
 .cat-btn.filled.on{border-color:var(--gr);background:var(--bg3);color:var(--gr)}
@@ -198,7 +232,7 @@ body{background:var(--bg);background-image:radial-gradient(ellipse at 20% 0%,rgb
 .toast.show{opacity:1}
 
 /* FULL TABLE VIEW */
-.ftbl-wrap{overflow:auto;padding:16px 20px 24px}
+.ftbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;padding:16px 0 24px}
 .th-add-month{background:transparent!important;border:none!important;padding:4px 8px!important;min-width:110px;}
 .add-month-btn{background:none;border:1px dashed var(--b2);border-radius:7px;color:var(--mu);font-size:10px;font-weight:500;padding:4px 10px;cursor:pointer;white-space:nowrap;transition:all .2s;font-family:inherit;}
 .add-month-btn:hover{border-color:var(--gr);color:var(--gr);background:rgba(52,199,89,.06);}
@@ -396,7 +430,6 @@ body{background:var(--bg);background-image:radial-gradient(ellipse at 20% 0%,rgb
   .tbtn{order:2;font-size:11px;padding:5px 8px}
   #entry-btn{order:2;margin-left:auto}
   #arch-btn{order:2}
-  #arch-btn::before{content:'📦'}
 
   /* ── TABS: компактнее ────────────────────────────────────── */
   .tabs{padding:0 10px}
@@ -457,18 +490,29 @@ body{background:var(--bg);background-image:radial-gradient(ellipse at 20% 0%,rgb
   .sbtn{width:100%;padding:8px;margin-top:2px}
 
   /* ── ALL DATA TABLES: меньше паддингов, явный скролл-намёк ── */
-  .year-wrap,.ftbl-wrap{
-    margin-left:-10px;margin-right:-10px;
-    padding-left:10px;padding-right:10px;
-    -webkit-overflow-scrolling:touch;
+  .ftbl-wrap{
+    margin:0 -10px;
+    padding:0;
+    border-radius:0;
   }
-  .year-tbl,.ftbl{font-size:11px}
-  .year-tbl th,.ftbl thead th{padding:6px 8px;font-size:9px;min-width:64px}
-  .year-tbl td,.ftbl td{padding:4px 8px;font-size:10.5px}
-  .year-tbl th:first-child,.ftbl thead th:first-child{min-width:130px;max-width:130px}
-  .ftbl td:first-child{min-width:130px;max-width:130px;padding-left:10px}
-  .ftbl thead th:first-child{padding-left:10px}
-  .th-add-month,.td-add{width:70px;min-width:70px}
+  .ftbl{font-size:11px;min-width:500px}
+  .ftbl thead th{
+    padding:6px 8px;font-size:9px;white-space:nowrap;
+    position:sticky;top:0;z-index:5;background:var(--bg);
+  }
+  .ftbl td{padding:5px 8px;font-size:11px}
+  .ftbl td:first-child,.ftbl thead th:first-child{
+    position:sticky;left:0;z-index:10;
+    background:var(--bg2);
+    min-width:110px;max-width:140px;
+    font-size:10px;
+  }
+  .ftbl thead th:first-child{z-index:20;background:var(--bg)}
+  .frow-point td:first-child{background:var(--bg3)!important}
+  .ftbl .frow-point td{padding:6px 8px;font-size:11px}
+  .ftbl .frow-point .mt{font-size:8px;padding:1px 4px}
+  .ftbl .frow-point .gbadge{font-size:8px;padding:1px 5px}
+  .th-add-month,.td-add{display:none}
 
   /* ── MODAL (попап «Внести данные»): почти fullscreen ─────── */
   .modal-ov{padding:0;align-items:flex-end}
@@ -523,6 +567,82 @@ body{background:var(--bg);background-image:radial-gradient(ellipse at 20% 0%,rgb
   .pm{padding:10px}
   .logo{font-size:13px}
 }
+
+/* ── РАСХОДЫ: новый попап ──────────────────────────────────── */
+.exp-cat-block{
+  padding:14px 20px;
+  border-bottom:1px solid var(--b);
+  transition:background .15s;
+}
+.exp-cat-block:hover{background:rgba(255,255,255,.02)}
+.exp-cat-head{
+  display:flex;justify-content:space-between;align-items:center;
+  margin-bottom:10px;
+}
+.exp-cat-name{
+  font-size:13px;font-weight:600;color:var(--tx);
+}
+.exp-cat-total{
+  font-size:14px;font-weight:700;color:var(--mu2);
+  transition:color .2s;
+  min-width:80px;text-align:right;
+}
+.exp-inputs{display:flex;flex-direction:column;gap:6px;margin-bottom:8px}
+.exp-input-row{
+  display:flex;align-items:center;gap:8px;
+  animation:fadeSlideIn .15s ease;
+}
+@keyframes fadeSlideIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+.exp-plus{
+  font-size:16px;font-weight:300;color:var(--mu);
+  width:16px;text-align:center;flex-shrink:0;
+}
+.exp-plus-placeholder{width:16px;flex-shrink:0}
+.exp-num-inp{
+  background:var(--bg4);
+  border:1px solid var(--b2);
+  border-radius:8px;
+  color:var(--tx);
+  font-size:14px;
+  font-weight:500;
+  padding:8px 12px;
+  outline:none;
+  text-align:right;
+  transition:all .15s;
+  min-width:0;
+}
+.exp-num-inp:focus{
+  border-color:var(--rd);
+  box-shadow:0 0 0 2px rgba(192,57,43,.15);
+  background:var(--bg3);
+}
+.exp-num-inp::placeholder{color:var(--mu2)}
+.exp-del-btn{
+  background:none;border:none;
+  color:var(--mu);cursor:pointer;
+  font-size:16px;padding:4px 6px;
+  border-radius:6px;
+  transition:all .15s;flex-shrink:0;
+}
+.exp-del-btn:hover{color:var(--rd);background:rgba(192,57,43,.1)}
+.exp-add-row-btn{
+  background:none;
+  border:1px dashed var(--b2);
+  border-radius:7px;
+  color:var(--mu);
+  font-size:11px;font-weight:500;
+  padding:4px 10px;
+  cursor:pointer;
+  transition:all .2s;
+  width:100%;
+  margin-top:2px;
+}
+.exp-add-row-btn:hover{
+  border-color:var(--rd);color:var(--rd);
+  background:rgba(192,57,43,.05);
+}
+#exp-save-btn{background:linear-gradient(135deg,#c0392b,#e74c3c)!important;border:none!important}
+#exp-save-btn:hover{background:linear-gradient(135deg,#a93226,#c0392b)!important;transform:translateY(-1px)}
 </style>
 </head>
 <body>
@@ -535,7 +655,7 @@ body{background:var(--bg);background-image:radial-gradient(ellipse at 20% 0%,rgb
     <div class="sep"></div>
     <div id="plbl" style="display:none"></div>
     <button class="tbtn green" onclick="showEntry('income')">+ Доходы</button>
-    <button class="tbtn" style="border-color:rgba(255,69,58,.4);color:var(--rd)" onclick="showEntry('expense')">− Расходы</button>
+    <button class="tbtn" style="border-color:rgba(255,69,58,.4);color:var(--rd)" onclick="showExpenseModal()">− Расходы</button>
     <button class="tbtn" id="arch-btn" onclick="toggleArch()">📦 Архив</button>
     <button class="tbtn" onclick="openSettings()" title="Настройки">⚙️</button>
   </div>
@@ -548,6 +668,39 @@ body{background:var(--bg);background-image:radial-gradient(ellipse at 20% 0%,rgb
 
   <!-- DASH -->
   <div class="cnt" id="dash"></div>
+
+  <!-- MODAL EXPENSES -->
+  <div class="modal-ov" id="expense-modal" onclick="onExpOvClick(event)">
+    <div class="modal-box" style="max-width:560px">
+      <div class="modal-head">
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <h2 style="margin:0">Расходы</h2>
+          <div style="display:flex;align-items:center;gap:6px">
+            <button onclick="shiftExpM(-1)" style="background:var(--bg3);border:1px solid var(--b);border-radius:6px;color:var(--tx);width:24px;height:24px;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center">‹</button>
+            <span id="exp-period" style="color:var(--mu);font-size:13px;min-width:90px;text-align:center"></span>
+            <button onclick="shiftExpM(1)" style="background:var(--bg3);border:1px solid var(--b);border-radius:6px;color:var(--tx);width:24px;height:24px;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center">›</button>
+          </div>
+        </div>
+        <button class="modal-close" onclick="closeExpenseModal()">×</button>
+      </div>
+      <div class="modal-body">
+        <!-- Выбор пункта -->
+        <div id="exp-pt-select" style="padding:12px 20px;border-bottom:1px solid var(--b)">
+          <div style="font-size:10px;font-weight:600;color:var(--mu);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Выберите пункт</div>
+          <div id="exp-pt-grid" style="display:flex;flex-wrap:wrap;gap:6px"></div>
+        </div>
+        <!-- Расходы по категориям -->
+        <div id="exp-cats-wrap" style="display:none;padding:0 0 16px"></div>
+      </div>
+      <div class="modal-foot" id="exp-foot" style="display:none">
+        <div style="font-size:12px;color:var(--mu)">Итого расходов: <b id="exp-tot-val" style="color:var(--rd)">0 ₽</b></div>
+        <div style="display:flex;gap:8px">
+          <button class="cancel-ep" onclick="closeExpenseModal()">Отмена</button>
+          <button class="save-all" id="exp-save-btn" onclick="saveExpenses()" style="background:var(--rd);border-color:var(--rd)">Сохранить</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- MODAL SETTINGS -->
   <div class="modal-ov" id="settings-modal" onclick="onSettingsOverlay(event)">
@@ -804,7 +957,7 @@ async function _drawDashAsync(){
   const tN=v.reduce((s,p)=>s+ps(p,_inc,_exp).net,0);
 
   // Лейбл текущего периода
-  const _pLabels={'month':MN[M-1]+' '+Y,'3m':'3 мес. до '+MN[M-1].slice(0,3)+' '+Y,'6m':'6 мес. до '+MN[M-1].slice(0,3)+' '+Y,'year':'12 мес. до '+MN[M-1].slice(0,3)+' '+Y,'alltime':'Всё время','table':'Таблица'};
+  const _pLabels={'month':MN[M-1]+' '+Y,'3m':'3 мес. до '+MN[M-1].slice(0,3)+' '+Y,'6m':'6 мес. до '+MN[M-1].slice(0,3)+' '+Y,'year':'12 мес. до '+MN[M-1].slice(0,3)+' '+Y,'alltime':'Всё время','table':''};
   const _periodLabel=_pLabels[dashView]||'';
   const _hideNav=['alltime','table','home'].includes(dashView);
 
@@ -1444,7 +1597,7 @@ function renderFullTable(v){
         return s+ptI-ptE-taxB*p.tax_rate;
       },0);
       return`<td>${t?xfmt(t,'profit'):'<span class="fv zero">—</span>'}</td>`;
-    }).join('')}<td class="td-add"></td>
+    }).join('')}
     <td>${xfmt(v.reduce((s,p)=>{
       const rd=buildPointTableData(p);
       return s+ms.reduce((ss,m)=>{
@@ -1588,11 +1741,15 @@ function isCatFilled(v){
 }
 function catBtnHtml(c){
   const filled=isCatFilled(c.v);
+  // Цветной акцент по типу категории
+  const isExp=c.type==='expense';
+  const accent=isExp?'rgba(192,57,43,.15)':'';
+  const expStyle=isExp?'background:linear-gradient(135deg,rgba(192,57,43,.1) 0%,rgba(192,57,43,.03) 100%);border-color:rgba(192,57,43,.3)':'';
   if(filled==='full')
     return `<button class="cat-btn filled" data-v="${c.v}" onclick="selCatFn('${c.v}')"><span class='cat-check'>✓</span> ${c.l}</button>`;
   if(filled==='partial')
     return `<button class="cat-btn partial" data-v="${c.v}" onclick="selCatFn('${c.v}')"><span class='cat-check' style='color:var(--am)'>◑</span> ${c.l}</button>`;
-  return `<button class="cat-btn" data-v="${c.v}" onclick="selCatFn('${c.v}')">${c.l}</button>`;
+  return `<button class="cat-btn" data-v="${c.v}" onclick="selCatFn('${c.v}')" ${isExp?`style="${expStyle}"`:''}>${c.l}</button>`;
 }
 function buildCatGrid(activeType){
   const t=activeType||'income';
@@ -2569,6 +2726,239 @@ function renderHomeCharts(){
 }
 
 // ── INIT ───────────────────────────────────────────────────────
+
+// ── РАСХОДЫ: попап по пунктам ─────────────────────────────────
+
+let expM=new Date().getMonth()+1;
+let expY=new Date().getFullYear();
+let selExpPt=null; // выбранный пункт
+
+function showExpenseModal(){
+  selExpPt=null;
+  expM=new Date().getMonth()+1;
+  expY=new Date().getFullYear();
+  updExpPeriod();
+  buildExpPtGrid();
+  document.getElementById('exp-cats-wrap').style.display='none';
+  document.getElementById('exp-foot').style.display='none';
+  document.getElementById('expense-modal').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+
+function closeExpenseModal(){
+  document.getElementById('expense-modal').classList.remove('open');
+  document.body.style.overflow='';
+}
+
+function onExpOvClick(e){
+  if(e.target===document.getElementById('expense-modal')) closeExpenseModal();
+}
+
+function updExpPeriod(){
+  document.getElementById('exp-period').textContent=MN[expM-1]+' '+expY;
+}
+
+function shiftExpM(d){
+  expM+=d;
+  if(expM>12){expM=1;expY++;}
+  if(expM<1){expM=12;expY--;}
+  updExpPeriod();
+  if(selExpPt) buildExpCats(selExpPt);
+}
+
+function buildExpPtGrid(){
+  const activePts=pts.filter(p=>!p.is_archived);
+  const groups=[{g:'A',l:'«А» личные'},{g:'AD',l:'«А+Д» партнёрские'},{g:'YM',l:'«ЯМ» сеть'}];
+  let h='';
+  groups.forEach(({g,l})=>{
+    const gpts=activePts.filter(p=>p.owner_group===g);
+    if(!gpts.length)return;
+    h+=`<div style="margin-bottom:10px">
+      <div style="font-size:10px;font-weight:600;color:var(--mu);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;display:flex;align-items:center;gap:6px">
+        <span class="gbadge b${g}" style="font-size:9px">${g}</span>${l}
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px">`;
+    gpts.forEach(p=>{
+      const mpc2=p.marketplace==='yandex'?'my':p.marketplace==='ozon'?'mo':'mw';
+      const hasExp=allExp.some(e=>e.point_id===p.id&&Number(e._month)===expM&&Number(e._year)===expY);
+      const grpCol={'A':'rgba(142,68,199,.15)','AD':'rgba(58,159,191,.15)','YM':'rgba(184,150,10,.15)'}[p.owner_group]||'transparent';
+      const isSelected=selExpPt===p.id;
+      h+=`<button onclick="selectExpPt('${p.id}')"
+        style="display:flex;align-items:center;gap:6px;padding:7px 11px;border-radius:10px;
+          border:1px solid ${isSelected?'var(--rd)':'var(--b)'};
+          background:linear-gradient(135deg,${grpCol} 0%,var(--bg3) 100%);
+          cursor:pointer;transition:all .15s;position:relative;
+          ${isSelected?'box-shadow:0 0 0 2px rgba(192,57,43,.3)':''}">
+        <span class="mt ${mpc2}" style="font-size:9px">${p.marketplace.toUpperCase()}</span>
+        <span style="font-size:12px;color:var(--tx)">${p.address}</span>
+        ${hasExp?'<span style="font-size:9px;color:var(--gr);margin-left:2px">✓</span>':''}
+      </button>`;
+    });
+    h+=`</div></div>`;
+  });
+  document.getElementById('exp-pt-grid').innerHTML=h;
+}
+
+function selectExpPt(pid){
+  selExpPt=pid;
+  buildExpPtGrid(); // обновляем выделение
+  buildExpCats(selExpPt);
+}
+
+const EXP_CATS=[
+  {v:'rent_util',l:'Аренда+коммуналка'},
+  {v:'salary',l:'Зарплата'},
+  {v:'internet',l:'Интернет'},
+  {v:'cameras',l:'Камеры'},
+  {v:'supplies',l:'Канцелярия/хоз/ремонт'},
+];
+
+function buildExpCats(pid){
+  const p=pts.find(x=>x.id===pid);
+  if(!p)return;
+
+  // Загружаем существующие расходы за этот месяц для этого пункта
+  const existing={};
+  const existingNotes={};
+  allExp.filter(e=>e.point_id===pid&&Number(e._month)===expM&&Number(e._year)===expY).forEach(e=>{
+    existing[e.category]=(existing[e.category]||0)+Number(e.amount);
+    existingNotes[e.category]=e.notes||'';
+  });
+
+  let h=`<div style="padding:12px 20px 6px;border-bottom:1px solid var(--b);display:flex;align-items:center;gap:8px">
+    <span class="mt ${p.marketplace==='yandex'?'my':p.marketplace==='ozon'?'mo':'mw'}" style="font-size:9px">${p.marketplace.toUpperCase()}</span>
+    <span class="gbadge b${p.owner_group}" style="font-size:9px">${p.owner_group}</span>
+    <span style="font-size:14px;font-weight:600;color:var(--tx)">${p.address}</span>
+  </div>`;
+
+  EXP_CATS.forEach(cat=>{
+    const existVal=existing[cat.v]||0;
+    // Парсим слагаемые из notes если есть (формат "15000+3000+2500")
+    const noteStr=existingNotes[cat.v]||'';
+    const parts=noteStr&&noteStr.includes('+')?noteStr.split('+').filter(x=>x.trim()):[existVal?String(Math.round(existVal)):''];
+
+    h+=`<div class="exp-cat-block" data-cat="${cat.v}" data-pid="${pid}">
+      <div class="exp-cat-head">
+        <span class="exp-cat-name">${cat.l}</span>
+        <span class="exp-cat-total" id="exp-total-${cat.v}">${existVal?fmt(existVal):'—'}</span>
+      </div>
+      <div class="exp-inputs" id="exp-inputs-${cat.v}">
+        ${parts.map((v,i)=>`
+          <div class="exp-input-row">
+            ${i>0?'<span class="exp-plus">+</span>':'<span class="exp-plus-placeholder"></span>'}
+            <input type="number" min="0" step="1" placeholder="0 ₽"
+              class="exp-num-inp" value="${v||''}"
+              oninput="calcExpCat('${cat.v}')"
+              onkeydown="expInputKey(event,'${cat.v}',${i})"
+              style="flex:1"/>
+            ${parts.length>1||v?`<button class="exp-del-btn" onclick="delExpRow('${cat.v}',${i})">×</button>`:''}
+          </div>`).join('')}
+      </div>
+      <button class="exp-add-row-btn" onclick="addExpRow('${cat.v}')">+ добавить</button>
+    </div>`;
+  });
+
+  document.getElementById('exp-cats-wrap').innerHTML=h;
+  document.getElementById('exp-cats-wrap').style.display='block';
+  document.getElementById('exp-foot').style.display='flex';
+  calcExpTotal();
+}
+
+function addExpRow(catV){
+  const wrap=document.getElementById('exp-inputs-'+catV);
+  const rows=wrap.querySelectorAll('.exp-input-row');
+  const div=document.createElement('div');
+  div.className='exp-input-row';
+  div.innerHTML=`<span class="exp-plus">+</span>
+    <input type="number" min="0" step="1" placeholder="0 ₽"
+      class="exp-num-inp"
+      oninput="calcExpCat('${catV}')"
+      onkeydown="expInputKey(event,'${catV}',${rows.length})"
+      style="flex:1"/>
+    <button class="exp-del-btn" onclick="this.closest('.exp-input-row').remove();calcExpCat('${catV}')">×</button>`;
+  wrap.appendChild(div);
+  div.querySelector('input').focus();
+  calcExpCat(catV);
+}
+
+function delExpRow(catV, idx){
+  const wrap=document.getElementById('exp-inputs-'+catV);
+  const rows=wrap.querySelectorAll('.exp-input-row');
+  if(rows[idx]) rows[idx].remove();
+  calcExpCat(catV);
+}
+
+function expInputKey(e, catV, idx){
+  if(e.key==='Enter'){e.preventDefault();addExpRow(catV);}
+}
+
+function calcExpCat(catV){
+  const wrap=document.getElementById('exp-inputs-'+catV);
+  const vals=Array.from(wrap.querySelectorAll('.exp-num-inp')).map(i=>parseFloat(i.value)||0);
+  const total=vals.reduce((s,v)=>s+v,0);
+  const el=document.getElementById('exp-total-'+catV);
+  if(el) el.textContent=total?fmt(total):'—';
+  el.style.color=total?'var(--rd)':'var(--mu2)';
+  calcExpTotal();
+}
+
+function calcExpTotal(){
+  let total=0;
+  EXP_CATS.forEach(cat=>{
+    const wrap=document.getElementById('exp-inputs-'+cat.v);
+    if(!wrap)return;
+    Array.from(wrap.querySelectorAll('.exp-num-inp')).forEach(i=>total+=parseFloat(i.value)||0);
+  });
+  const el=document.getElementById('exp-tot-val');
+  if(el) el.textContent=fmt(total);
+}
+
+async function saveExpenses(){
+  if(!selExpPt){toast('Выберите пункт');return;}
+  const btn=document.getElementById('exp-save-btn');
+  btn.disabled=true;btn.textContent='Сохранение...';
+
+  try{
+    // Получаем или создаём month_id
+    let {data:mRow}=await db.from('months').select('id').eq('year',expY).eq('month',expM).maybeSingle();
+    if(!mRow){
+      const {data:ins}=await db.from('months').insert({year:expY,month:expM}).select('id').single();
+      mRow=ins;
+    }
+    const mid2=mRow.id;
+    const date=expY+'-'+String(expM).padStart(2,'0')+'-01';
+    const rows=[];
+
+    EXP_CATS.forEach(cat=>{
+      const wrap=document.getElementById('exp-inputs-'+cat.v);
+      if(!wrap)return;
+      const vals=Array.from(wrap.querySelectorAll('.exp-num-inp')).map(i=>parseFloat(i.value)||0).filter(v=>v>0);
+      if(!vals.length)return;
+      const total=vals.reduce((s,v)=>s+v,0);
+      const notes=vals.length>1?vals.join('+'):'';
+      rows.push({point_id:selExpPt,month_id:mid2,category:cat.v,label:cat.l,amount:total,entry_date:date,notes});
+    });
+
+    if(!rows.length){toast('Нет сумм');btn.disabled=false;btn.textContent='Сохранить';return;}
+
+    // Удаляем старые и вставляем новые
+    const cats=rows.map(r=>r.category);
+    await db.from('expense_entries').delete().eq('month_id',mid2).eq('point_id',selExpPt).in('category',cats);
+    await db.from('expense_entries').insert(rows);
+
+    toast('✓ Расходы сохранены');
+    await refreshAllData();
+    drawDash();
+    // Обновляем галочки в сетке пунктов
+    buildExpPtGrid();
+    buildExpCats(selExpPt);
+
+  }catch(e){
+    alert('Ошибка: '+e.message);
+  }finally{
+    btn.disabled=false;btn.textContent='Сохранить';
+  }
+}
 
 </script>
 </body>
