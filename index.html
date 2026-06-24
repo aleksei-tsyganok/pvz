@@ -2,8 +2,12 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ПВЗ — Финансы</title>
+<link rel="icon" type="image/png" sizes="32x32" href="favicon.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="favicon.png">
+  <meta name="apple-mobile-web-app-title" content="PVZSTAT">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PVZ</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
@@ -661,6 +665,30 @@ body{background:var(--bg);background-image:radial-gradient(ellipse at 20% 0%,rgb
 }
 #exp-save-btn{background:linear-gradient(135deg,#c0392b,#e74c3c)!important;border:none!important}
 #exp-save-btn:hover{background:linear-gradient(135deg,#a93226,#c0392b)!important;transform:translateY(-1px)}
+
+/* ── PERIOD PICKER ──────────────────────────────────────── */
+.period-picker{
+  display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+  padding:10px 0 14px;border-bottom:1px solid var(--b);margin-bottom:14px;
+}
+.period-presets{display:flex;gap:6px}
+.pp-btn{
+  padding:5px 12px;border-radius:8px;border:1px solid var(--b2);
+  background:none;color:var(--mu);font-size:12px;cursor:pointer;transition:all .15s;
+}
+.pp-btn.on{border-color:var(--pu);color:var(--pu);background:rgba(142,68,199,.1)}
+.pp-btn:hover{border-color:var(--b2);color:var(--tx)}
+.period-range{display:flex;align-items:center;gap:8px;flex:1}
+.period-select-wrap{display:flex;align-items:center;gap:6px}
+.period-select-wrap label{font-size:11px;color:var(--mu);white-space:nowrap}
+.period-select-wrap select{
+  background:var(--bg3);border:1px solid var(--b2);border-radius:8px;
+  color:var(--tx);font-size:12px;padding:5px 8px;cursor:pointer;outline:none;
+}
+@media(max-width:640px){
+  .period-picker{flex-direction:column;align-items:flex-start;gap:8px}
+  .period-range{flex-wrap:wrap}
+}
 </style>
 </head>
 <body>
@@ -794,6 +822,9 @@ let M=_now.getMonth(); // getMonth() возвращает 0-11, т.е. getMonth(
 let Y=_now.getFullYear();
 if(M<1){M=12;Y--;} // если январь — прошлый месяц декабрь прошлого года
 let tab='all',arch=false,mid=null,open=null,selCat=null;
+// Период (для вкладки "Период")
+let periodFrom={m:3,y:2026},periodTo={m:new Date().getMonth()||12,y:new Date().getMonth()?new Date().getFullYear():new Date().getFullYear()-1};
+let periodN=3; // активный пресет (3/6/12/0=custom)
 let addState={};
 let dashView='home'; // 'home' | 'month' | '3m' | '6m' | 'year' | 'table'
 
@@ -847,7 +878,7 @@ window.addEventListener('DOMContentLoaded',async()=>{
 // Перезагружает данные актуальные для текущего вида (month/3m/6m/year/alltime/table)
 async function refreshAllData(){
   await load(); // всегда обновляем inc/exp текущего месяца (используется видом 'month')
-  if(dashView==='home'){
+  if(dashView==='period'||dashView==='home'){
     document.getElementById('dash').innerHTML='<div style="padding:40px;text-align:center;color:var(--mu)">Загрузка...</div>';
     await loadAllMonths();
   } else if(dashView==='year'){
@@ -912,12 +943,12 @@ async function loadAllMonths(){
 }
 
 async function loadYear(){
-  const months=getRangeMonths(12); // 12 месяцев заканчивающихся текущим M/Y
+  const months=getRangeMonths(12);
   await loadRange(months);
 }
 
 function getRangeMonths(n){
-  // last n months ending at current Y/M
+  // last n months ending at current Y/M (for navigation)
   const res=[];
   let cy=Y,cm=M;
   for(let i=0;i<n;i++){
@@ -961,31 +992,79 @@ function expByCat(rows){
 }
 
 // ── DASHBOARD ─────────────────────────────────────────────────
+function buildMonthOptions(sel){
+  // Строим список месяцев из allInc/allExp
+  const monthSet=new Set();
+  [...allInc,...allExp].forEach(e=>{if(e._year&&e._month)monthSet.add(e._year+'-'+String(e._month).padStart(2,'0'));});
+  const sorted=Array.from(monthSet).sort();
+  const MNS=['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'];
+  return sorted.map(k=>{
+    const[y,m]=k.split('-');
+    const selected=(Number(m)===sel.m&&Number(y)===sel.y)?'selected':'';
+    return `<option value="${k}" ${selected}>${MNS[Number(m)-1]} ${y}</option>`;
+  }).join('');
+}
+
+function onPeriodChange(){
+  const from=document.getElementById('period-from')?.value;
+  const to=document.getElementById('period-to')?.value;
+  if(!from||!to)return;
+  const[fy,fm]=from.split('-').map(Number);
+  const[ty,tm]=to.split('-').map(Number);
+  periodFrom={m:fm,y:fy};
+  periodTo={m:tm,y:ty};
+  periodN=0; // сбрасываем пресет
+  drawDash();
+}
+
+async function setPeriodPreset(n){
+  periodN=n;
+  // n месяцев назад от текущего M/Y
+  const months=getRangeMonths(n);
+  periodFrom={m:months[0].month,y:months[0].year};
+  periodTo={m:months[months.length-1].month,y:months[months.length-1].year};
+  await setView('period');
+}
+
+function getPeriodMonths(){
+  // Все месяцы между periodFrom и periodTo включительно
+  const months=[];
+  let cy=periodFrom.y,cm=periodFrom.m;
+  while(cy<periodTo.y||(cy===periodTo.y&&cm<=periodTo.m)){
+    months.push({year:cy,month:cm});
+    cm++;if(cm>12){cm=1;cy++;}
+    if(months.length>120)break; // защита
+  }
+  return months;
+}
+
 function drawDash(){return _drawDashAsync().catch(e=>console.error('drawDash error:',e));}
 async function _drawDashAsync(){
   const v=vp();
-  // Для таблицы и alltime — считаем из allInc/allExp (все данные)
-  // Для остальных видов — из inc/exp (текущий период)
-  const _useAll=dashView!=='month';
-  const _inc=_useAll?allInc:inc;
-  const _exp=_useAll?allExp:exp;
+  // Данные для карточек сводки
+  let _inc,_exp;
+  if(dashView==='month'){_inc=inc;_exp=exp;}
+  else if(dashView==='period'){
+    const _pm=getPeriodMonths();
+    _inc=allInc.filter(e=>_pm.some(m=>Number(m.month)===Number(e._month)&&Number(m.year)===Number(e._year)));
+    _exp=allExp.filter(e=>_pm.some(m=>Number(m.month)===Number(e._month)&&Number(m.year)===Number(e._year)));
+  } else {_inc=allInc;_exp=allExp;}
   const tI=v.reduce((s,p)=>s+ps(p,_inc,_exp).iM,0);
   const tX=v.reduce((s,p)=>s+ps(p,_inc,_exp).xM,0);
   const tT=v.reduce((s,p)=>s+ps(p,_inc,_exp).tax,0);
   const tN=v.reduce((s,p)=>s+ps(p,_inc,_exp).net,0);
 
   // Лейбл текущего периода
-  const _pLabels={'month':MN[M-1]+' '+Y,'3m':'3 мес. до '+MN[M-1].slice(0,3)+' '+Y,'6m':'6 мес. до '+MN[M-1].slice(0,3)+' '+Y,'year':'12 мес. до '+MN[M-1].slice(0,3)+' '+Y,'alltime':'Всё время','table':''};
+  const MNS2=['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'];
+  const _pLabels={'month':MN[M-1]+' '+Y,'period':MNS2[periodFrom.m-1]+' '+periodFrom.y+' — '+MNS2[periodTo.m-1]+' '+periodTo.y,'3m':'3 мес. до '+MN[M-1].slice(0,3)+' '+Y,'6m':'6 мес. до '+MN[M-1].slice(0,3)+' '+Y,'year':'12 мес. до '+MN[M-1].slice(0,3)+' '+Y,'alltime':'Всё время','table':''};
   const _periodLabel=_pLabels[dashView]||'';
-  const _hideNav=['alltime','table','home'].includes(dashView);
+  const _hideNav=['alltime','table','home','period'].includes(dashView);
 
   let h=`
   <div class="view-sw">
     <button class="vsw${dashView==='home'?' on':''}" onclick="setView('home')">Главная</button>
     <button class="vsw${dashView==='month'?' on':''}" onclick="setView('month')">Месяц</button>
-    <button class="vsw${dashView==='3m'?' on':''}" onclick="setView('3m')">3 месяца</button>
-    <button class="vsw${dashView==='6m'?' on':''}" onclick="setView('6m')">6 месяцев</button>
-    <button class="vsw${dashView==='year'?' on':''}" onclick="setView('year')">12 месяцев</button>
+    <button class="vsw${['3m','6m','year','period'].includes(dashView)?' on':''}" onclick="setView('period')">Период</button>
     <button class="vsw${dashView==='alltime'?' on':''}" onclick="setView('alltime')">Всё время</button>
     <button class="vsw${dashView==='table'?' on':''}" onclick="setView('table')" style="margin-left:8px;border-color:var(--pu);color:${dashView==='table'?'var(--tx)':'var(--pu)'}">⊞ Таблица</button>
   </div>
@@ -994,6 +1073,28 @@ async function _drawDashAsync(){
     <span class="period-lbl">${_periodLabel}</span>
     <button class="pnav-btn${_hideNav?' hidden':''}" onclick="shiftPeriod(1)">›</button>
   </div>
+  ${dashView==='period'?`<div class="period-picker">
+    <div class="period-presets">
+      <button class="pp-btn${periodN===3?' on':''}" onclick="setPeriodPreset(3)">3 мес</button>
+      <button class="pp-btn${periodN===6?' on':''}" onclick="setPeriodPreset(6)">6 мес</button>
+      <button class="pp-btn${periodN===12?' on':''}" onclick="setPeriodPreset(12)">12 мес</button>
+    </div>
+    <div class="period-range">
+      <div class="period-select-wrap">
+        <label>С</label>
+        <select id="period-from" onchange="onPeriodChange()">
+          ${buildMonthOptions(periodFrom)}
+        </select>
+      </div>
+      <span style="color:var(--mu)">—</span>
+      <div class="period-select-wrap">
+        <label>По</label>
+        <select id="period-to" onchange="onPeriodChange()">
+          ${buildMonthOptions(periodTo)}
+        </select>
+      </div>
+    </div>
+  </div>`:''}
   <div class="sum4">
     <div class="sc"><div class="sc-l">Мой доход</div><div class="sc-v" style="color:var(--gr)">${fmt(tI)}</div></div>
     <div class="sc"><div class="sc-l">Мои расходы</div><div class="sc-v" style="color:var(--rd)">${fmt(tX)}</div></div>
@@ -1005,6 +1106,8 @@ async function _drawDashAsync(){
     h+=await renderHomeView(v);
   } else if(dashView==='year'){
     h+=renderMultiMonthView(v,12);
+  } else if(dashView==='period'){
+    h+=renderMultiMonthView(v,getPeriodMonths().length,getPeriodMonths());
   } else if(dashView==='3m'||dashView==='6m'){
     h+=renderMultiMonthView(v, dashView==='3m'?3:6);
   } else if(dashView==='alltime'){
@@ -1096,8 +1199,8 @@ function renderMonthView(v){
 
 
 
-function renderMultiMonthView(v, n){
-  const months=getRangeMonths(n);
+function renderMultiMonthView(v, n, overrideMonths){
+  const months=overrideMonths||getRangeMonths(n);
 
   if(!allInc.length&&!allExp.length){
     return '<div style="color:var(--mu);padding:20px;text-align:center;font-size:13px">Загрузка данных...</div>';
@@ -1699,16 +1802,12 @@ async function setView(v){
   dashView=v;
   allInc=[];allExp=[];
   document.getElementById('dash').innerHTML='<div style="padding:40px;text-align:center;color:var(--mu)">Загрузка...</div>';
-  if(v==='home'){
+  if(v==='home'||v==='period'||v==='table'||v==='alltime'){
     await loadAllMonths();
   } else if(v==='year'){
     await loadYear();
   } else if(v==='3m'||v==='6m'){
     await loadRange(getRangeMonths(v==='3m'?3:6));
-  } else if(v==='table'){
-    await loadAllMonths();
-  } else if(v==='alltime'){
-    await loadAllMonths();
   } else {
     await load();
   }
@@ -2700,13 +2799,20 @@ async function renderHomeView(v){
 }
 
 function renderMultiMonthViewAll(v){
-  // Берём все уникальные месяцы из базы и считаем суммарно через renderMultiMonthView
+  // Берём все уникальные месяцы из базы в хронологическом порядке
   const monthSet=new Set();
   [...allInc,...allExp].forEach(e=>{
     if(e._year&&e._month) monthSet.add(e._year+'-'+String(e._month).padStart(2,'0'));
   });
-  const n=monthSet.size||1;
-  return renderMultiMonthView(v,n);
+  const sortedKeys=Array.from(monthSet).sort();
+  // Строим реальный список месяцев из базы
+  const realMonths=sortedKeys.map(k=>{
+    const[y,m]=k.split('-');
+    return{year:Number(y),month:Number(m)};
+  });
+  if(!realMonths.length) return '<div style="color:var(--mu);padding:20px;text-align:center">Нет данных</div>';
+  // Используем renderMultiMonthView но с реальным списком
+  return renderMultiMonthView(v, realMonths.length, realMonths);
 }
 
 function renderHomeCharts(){
