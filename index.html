@@ -831,13 +831,13 @@ const MN=['Январь','Февраль','Март','Апрель','Май','И
 const CATS=[
   {v:'AV_yandex',l:'АВ Яндекс',type:'income',mp:'yandex'},
   {v:'AV_ozon',l:'АВ Озон',type:'income',mp:'ozon'},
-  {v:'AV_wb',l:'АВ WB',type:'income',mp:'wb'},
+  {v:'AV_wb',l:'АВ WB',type:'income',mp:'wb',multiEntry:true},
   {v:'YMVmeste',l:'ЯМаркет Вместе',type:'income',addresses:['Ладо Кецховели 37','Яковлева 46','Северная 9','Ольховая 2а','Сопочная 36']},
   {v:'YandexEda',l:'Яндекс Еда',type:'income',mp:'yandex',perOperation:true},
   {v:'SimaLand',l:'SimaLand',type:'income',addresses:['Ладо Кецховели 37','Калинина 181']},
   {v:'ChemClean',l:'Химчистка',type:'income',commission:0.12},
   {v:'BeriZaryad',l:'Бери заряд',type:'income'},
-  {v:'Print',l:'Пункт Печати',type:'income',taxExempt:true},
+  {v:'Print',l:'Пункт Печати',type:'income',taxExempt:true,multiEntry:true},
   {v:'DPD',l:'DPD',type:'income'},
   {v:'custom_inc',l:'Другой доход',type:'income',custom:true},
   {v:'rent_util',l:'Аренда+коммуналка',type:'expense'},
@@ -1859,9 +1859,10 @@ function isCatFilled(v){
   // Если entryM/entryY совпадает с текущим M/Y — берём из inc/exp
   // Иначе нужно смотреть в allInc/allExp
   const allSource=(c&&c.type==='expense')?allExp:allInc;
-  const entries=allSource.length
+  const entries=(allSource.length
     ? allSource.filter(e=>e.category===v&&Number(e._month)===Number(entryM)&&Number(e._year)===Number(entryY))
-    : source.filter(e=>e.category===v);
+    : source.filter(e=>e.category===v))
+    .filter(e=>!(e.notes&&e.notes.startsWith('deduct:'))&&Number(e.amount)>=0);
   const filledIds=new Set(entries.map(e=>e.point_id));
   const filledCount=rel.filter(p=>filledIds.has(p.id)).length;
   if(filledCount===0) return 'none';
@@ -1938,7 +1939,8 @@ function buildEntryTbl(){
   const allSource=isExp?allExp:allInc;
   const monthSource=allSource.filter(e=>e.category===selCat&&Number(e._month)===Number(entryM)&&Number(e._year)===Number(entryY));
   // Если allInc ещё не загружен — берём из inc/exp текущего месяца как фолбэк
-  const sourceData=allSource.length?monthSource:(isExp?exp:inc).filter(e=>e.category===selCat&&(entryM===M&&entryY===Y));
+  const sourceData=(allSource.length?monthSource:(isExp?exp:inc).filter(e=>e.category===selCat&&(entryM===M&&entryY===Y)))
+    .filter(e=>isExp||(!(e.notes&&e.notes.startsWith('deduct:'))&&Number(e.amount)>=0)); // исключаем вычеты только из доходов
   sourceData.forEach(e=>{
     existing[e.point_id]=(existing[e.point_id]||0)+Number(e.amount);
     existingDates[e.point_id]=e.entry_date||today;
@@ -1982,7 +1984,19 @@ function buildEntryTbl(){
     // existVal — сохранённая МОЯ доля. Показываем пользователю обратно ПОЛНУЮ сумму,
     // которую он вводил (полная * комиссия * доля = existVal → полная = existVal / (комиссия*доля))
     const divisor=commPct*p.my_share;
-    const displayVal=hasData&&divisor&&!isPerOp
+    const isMulti=!!cat.multiEntry;
+    // Для multiEntry — парсим слагаемые из notes
+    let multiParts=[''];
+    if(isMulti&&hasData){
+      const noteStr=existingNotes[p.id]||'';
+      const rawParts=noteStr&&noteStr.includes('+')?noteStr.split('+').filter(x=>x.trim()):[];
+      if(rawParts.length>0){
+        multiParts=rawParts;
+      } else {
+        multiParts=[String(Math.round(existVal/divisor))];
+      }
+    }
+    const displayVal=hasData&&divisor&&!isPerOp&&!isMulti
       ? Math.round(existVal/divisor)
       : '';
 
@@ -1990,7 +2004,22 @@ function buildEntryTbl(){
       <td><div class="pi"><span class="mt ${mpc(p.marketplace)}">${p.marketplace.toUpperCase()}</span><span class="pa">${p.address}</span></div></td>
       <td><span class="gbadge b${p.owner_group}" style="font-size:10px">${p.owner_group}</span></td>
       ${cat.custom?`<td><input type="text" id="lbl-${p.id}" style="background:var(--bg4);border:1px solid var(--b2);border-radius:6px;color:var(--tx);padding:5px 8px;outline:none;font-size:12px;width:110px" placeholder="Название"/></td>`:''}
-      ${isComm
+      ${isMulti
+        ?`<td style="text-align:right;min-width:180px">
+            <div class="multi-inp-wrap" id="multi-wrap-${p.id}">
+              ${multiParts.map((v,i)=>`<div class="exp-input-row" style="margin-bottom:4px">
+                ${i>0?'<span class="exp-plus">+</span>':'<span class="exp-plus-placeholder"></span>'}
+                <input type="number" min="0" step="1" placeholder="0 ₽" class="exp-num-inp multi-inp" data-pid="${p.id}"
+                  value="${v||''}" oninput="calcMultiInp('${p.id}')"
+                  onkeydown="multiInpKey(event,'${p.id}')"
+                  style="flex:1;min-width:80px"/>
+                ${multiParts.length>1||v?`<button class="exp-del-btn" onclick="delMultiRow('${p.id}',${i})">×</button>`:''}
+              </div>`).join('')}
+            </div>
+            <button class="exp-add-row-btn" onclick="addMultiRow('${p.id}')" style="margin-top:4px">+ выплата</button>
+            <input type="hidden" class="amt-inp" id="amt-${p.id}" data-share="${p.my_share}" data-comm="1" value=""/>
+          </td>`
+        : isComm
         ?`<td style="text-align:right"><input class="amt-inp" type="number" min="0" step="0.01" placeholder="—" id="amt-${p.id}" oninput="updEpTotal()" data-share="${p.my_share}" data-comm="${commPct}" value="${displayVal}"/></td>
           <td style="text-align:right"><span class="share-hint" id="comm-${p.id}" style="color:var(--am)">—</span></td>`
         : isPerOp
@@ -2071,6 +2100,45 @@ async function cancelEntry(pointId){
     alert('Ошибка отмены: '+e.message);
   }
 }
+function addMultiRow(pid){
+  const wrap=document.getElementById('multi-wrap-'+pid);
+  if(!wrap)return;
+  const rows=wrap.querySelectorAll('.exp-input-row');
+  const div=document.createElement('div');
+  div.className='exp-input-row';
+  div.style.marginBottom='4px';
+  div.innerHTML=`<span class="exp-plus">+</span>
+    <input type="number" min="0" step="1" placeholder="0 ₽" class="exp-num-inp multi-inp" data-pid="${pid}"
+      style="flex:1;min-width:80px" oninput="calcMultiInp('${pid}')"
+      onkeydown="multiInpKey(event,'${pid}')"/>
+    <button class="exp-del-btn" onclick="this.closest('.exp-input-row').remove();calcMultiInp('${pid}')">×</button>`;
+  wrap.appendChild(div);
+  div.querySelector('input').focus();
+  calcMultiInp(pid);
+}
+
+function delMultiRow(pid, idx){
+  const wrap=document.getElementById('multi-wrap-'+pid);
+  if(!wrap)return;
+  const rows=wrap.querySelectorAll('.exp-input-row');
+  if(rows[idx])rows[idx].remove();
+  calcMultiInp(pid);
+}
+
+function multiInpKey(e, pid){
+  if(e.key==='Enter'){e.preventDefault();addMultiRow(pid);}
+}
+
+function calcMultiInp(pid){
+  const wrap=document.getElementById('multi-wrap-'+pid);
+  if(!wrap)return;
+  const vals=Array.from(wrap.querySelectorAll('.multi-inp')).map(i=>parseFloat(i.value)||0);
+  const total=vals.reduce((s,v)=>s+v,0);
+  const hidden=document.getElementById('amt-'+pid);
+  if(hidden)hidden.value=total||'';
+  updEpTotal();
+}
+
 function updEpTotal(){
   // Для категорий "за операцию" (напр. Яндекс Еда) — считаем полную сумму = цена * кол-во
   // и записываем в скрытый input.amt-, чтобы остальная логика (доля/налог/группы) сработала как обычно.
@@ -2138,8 +2206,18 @@ async function saveAll(){
   const rel=ptsForCat(selCat);
   const rows=[];
   for(const p of rel){
+    // Для multiEntry — суммируем все строки и сохраняем в hidden amt
+    if(cat.multiEntry){
+      const wrap=document.getElementById('multi-wrap-'+p.id);
+      if(wrap){
+        const vals=Array.from(wrap.querySelectorAll('.multi-inp')).map(i=>parseFloat(i.value)||0).filter(v=>v>0);
+        const total=vals.reduce((s,v)=>s+v,0);
+        const hidden=document.getElementById('amt-'+p.id);
+        if(hidden){hidden.value=total;hidden.dataset.notes=vals.length>1?vals.join('+'):'';}
+      }
+    }
     const rawVal=document.getElementById('amt-'+p.id)?.value;
-    if(rawVal===''||rawVal===undefined||rawVal===null)continue; // поле не заполнено — пропускаем
+    if(rawVal===''||rawVal===undefined||rawVal===null)continue;
     const rawAmt=parseFloat(rawVal);
     if(isNaN(rawAmt))continue;
     const dat=document.getElementById('entry-date')?.value||new Date().toISOString().split('T')[0];
@@ -2151,7 +2229,10 @@ async function saveAll(){
     // Полная сумма * комиссия (если есть) * доля пункта = моя доля для сохранения в базу
     const amt=rawAmt*commPct*effShare;
     let notes='';
-    if(cat.commission){
+    if(cat.multiEntry){
+      const hidden=document.getElementById('amt-'+p.id);
+      notes=hidden?.dataset.notes||'';
+    } else if(cat.commission){
       notes=`оборот: ${Math.round(amt/(p.my_share*(cat.commission||1)))}`;
     }else if(cat.perOperation){
       const priceEl=document.getElementById('price-'+p.id);
@@ -2979,6 +3060,11 @@ function buildExpCats(pid){
     existing[e.category]=(existing[e.category]||0)+Number(e.amount);
     existingNotes[e.category]=e.notes||'';
   });
+  // Также загружаем вычеты из доходов (deduct-записи в allInc с отрицательной суммой)
+  allInc.filter(e=>e.point_id===pid&&Number(e._month)===expM&&Number(e._year)===expY&&e.notes&&e.notes.startsWith('deduct:')).forEach(e=>{
+    existing[e.category]=(existing[e.category]||0)+Math.abs(Number(e.amount));
+    existingNotes[e.category]=e.notes.replace('deduct:','')||'';
+  });
 
   let h=`<div style="padding:12px 20px 6px;border-bottom:1px solid var(--b);display:flex;align-items:center;gap:8px">
     <span class="mt ${p.marketplace==='yandex'?'my':p.marketplace==='ozon'?'mo':'mw'}" style="font-size:9px">${p.marketplace.toUpperCase()}</span>
@@ -2986,8 +3072,12 @@ function buildExpCats(pid){
     <span style="font-size:14px;font-weight:600;color:var(--tx)">${p.address}</span>
   </div>`;
 
-  // Дополнительные расходные категории (добавленные пользователем для этого пункта)
-  const extraExpCats = (window._extraExpCats && window._extraExpCats[pid]) || [];
+  // Дополнительные расходные категории (добавленные пользователем + те у которых есть deduct-данные)
+  const deductCatsInDb=allInc
+    .filter(e=>e.point_id===pid&&Number(e._month)===expM&&Number(e._year)===expY&&e.notes&&e.notes.startsWith('deduct:'))
+    .map(e=>({v:e.category,l:CL[e.category]||e.category}));
+  const savedExtra=(window._extraExpCats&&window._extraExpCats[pid])||[];
+  const extraExpCats=[...savedExtra,...deductCatsInDb.filter(d=>!savedExtra.find(s=>s.v===d.v))];
   const allExpCats = [...EXP_CATS, ...extraExpCats];
 
   allExpCats.forEach(cat=>{
