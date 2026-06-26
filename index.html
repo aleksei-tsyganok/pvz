@@ -2015,13 +2015,17 @@ async function cancelAllEntries(){
   const btn=document.getElementById('cancel-all-btn');
   btn.disabled=true;
   try{
+    let {data:mRowC}=await db.from('months').select('id').eq('year',entryY).eq('month',entryM).maybeSingle();
+    const cancelMid=mRowC?.id||mid;
     if(cat.type==='income'){
-      await db.from('income_entries').delete().eq('month_id',mid).eq('category',selCat).in('point_id',pids);
+      await db.from('income_entries').delete().eq('month_id',cancelMid).eq('category',selCat).in('point_id',pids);
     }else{
-      await db.from('expense_entries').delete().eq('month_id',mid).eq('category',selCat).in('point_id',pids);
+      await db.from('expense_entries').delete().eq('month_id',cancelMid).eq('category',selCat).in('point_id',pids);
     }
     toast('✓ Все записи отменены');
-    await refreshAllData();
+    allInc=[];allExp=[];
+    await loadAllMonths();
+    await load();
     buildCatGrid();
     buildEntryTbl();
     drawDash();
@@ -2037,13 +2041,17 @@ async function cancelEntry(pointId){
   const cat=CATS.find(c=>c.v===selCat);if(!cat)return;
   if(!confirm('Отменить внесённые данные по этому пункту за этот месяц?'))return;
   try{
+    let {data:mRowX}=await db.from('months').select('id').eq('year',entryY).eq('month',entryM).maybeSingle();
+    const cancelMidX=mRowX?.id||mid;
     if(cat.type==='income'){
-      await db.from('income_entries').delete().eq('month_id',mid).eq('category',selCat).eq('point_id',pointId);
+      await db.from('income_entries').delete().eq('month_id',cancelMidX).eq('category',selCat).eq('point_id',pointId);
     }else{
-      await db.from('expense_entries').delete().eq('month_id',mid).eq('category',selCat).eq('point_id',pointId);
+      await db.from('expense_entries').delete().eq('month_id',cancelMidX).eq('category',selCat).eq('point_id',pointId);
     }
     toast('✓ Внесение отменено');
-    await refreshAllData();
+    allInc=[];allExp=[];
+    await loadAllMonths();
+    await load();
     buildCatGrid();
     buildEntryTbl();
     drawDash();
@@ -2142,17 +2150,28 @@ async function saveAll(){
   }
   if(!rows.length){toast('Нет сумм для сохранения');btn.disabled=false;btn.textContent='Сохранить всё';return}
   try{
+    // Получаем или создаём month_id для entryM/entryY (месяц из попапа)
+    let {data:mRow,error:me}=await db.from('months').select('id').eq('year',entryY).eq('month',entryM).maybeSingle();
+    if(!mRow){
+      const {data:ins,error:ie}=await db.from('months').insert({year:entryY,month:entryM}).select('id').single();
+      if(ie)throw ie;
+      mRow=ins;
+    }
+    const entryMid=mRow.id;
     // Удаляем старые записи этой категории за этот месяц для каждого пункта
     const pids=rows.map(r=>r.p.id);
     if(cat.type==='income'){
-      await db.from('income_entries').delete().eq('month_id',mid).eq('category',selCat).in('point_id',pids);
-      await db.from('income_entries').insert(rows.map(r=>({point_id:r.p.id,month_id:mid,category:selCat,label:r.lbl,amount:r.amt,entry_date:r.dat,tax_exempt:r.tex,notes:r.notes})));
+      await db.from('income_entries').delete().eq('month_id',entryMid).eq('category',selCat).in('point_id',pids);
+      await db.from('income_entries').insert(rows.map(r=>({point_id:r.p.id,month_id:entryMid,category:selCat,label:r.lbl,amount:r.amt,entry_date:r.dat,tax_exempt:r.tex,notes:r.notes})));
     }else{
-      await db.from('expense_entries').delete().eq('month_id',mid).eq('category',selCat).in('point_id',pids);
-      await db.from('expense_entries').insert(rows.map(r=>({point_id:r.p.id,month_id:mid,category:selCat,label:CL[selCat]||selCat,amount:r.amt,entry_date:r.dat,notes:''})));
+      await db.from('expense_entries').delete().eq('month_id',entryMid).eq('category',selCat).in('point_id',pids);
+      await db.from('expense_entries').insert(rows.map(r=>({point_id:r.p.id,month_id:entryMid,category:selCat,label:CL[selCat]||selCat,amount:r.amt,entry_date:r.dat,notes:''})));
     }
     toast(`✓ Сохранено ${rows.length} записей`);
-    await refreshAllData();
+    // Принудительно сбрасываем и перезагружаем все данные
+    allInc=[];allExp=[];
+    await loadAllMonths();
+    await load();
     buildCatGrid();
     buildEntryTbl();
     drawDash();
@@ -2955,16 +2974,23 @@ function buildExpCats(pid){
     <span style="font-size:14px;font-weight:600;color:var(--tx)">${p.address}</span>
   </div>`;
 
-  EXP_CATS.forEach(cat=>{
+  // Дополнительные расходные категории (добавленные пользователем для этого пункта)
+  const extraExpCats = (window._extraExpCats && window._extraExpCats[pid]) || [];
+  const allExpCats = [...EXP_CATS, ...extraExpCats];
+
+  allExpCats.forEach(cat=>{
     const existVal=existing[cat.v]||0;
-    // Парсим слагаемые из notes если есть (формат "15000+3000+2500")
     const noteStr=existingNotes[cat.v]||'';
     const parts=noteStr&&noteStr.includes('+')?noteStr.split('+').filter(x=>x.trim()):[existVal?String(Math.round(existVal)):''];
+    const isExtra=!EXP_CATS.find(c=>c.v===cat.v);
 
     h+=`<div class="exp-cat-block" data-cat="${cat.v}" data-pid="${pid}">
       <div class="exp-cat-head">
-        <span class="exp-cat-name">${cat.l}</span>
-        <span class="exp-cat-total" id="exp-total-${cat.v}">${existVal?fmt(existVal):'—'}</span>
+        <span class="exp-cat-name">${cat.l}${isExtra?'<span style="font-size:9px;color:var(--mu);margin-left:4px">доп.</span>':''}</span>
+        <div style="display:flex;align-items:center;gap:8px">
+          ${isExtra?`<button onclick="removeExtraExpCat('${pid}','${cat.v}')" style="background:none;border:none;color:var(--mu);cursor:pointer;font-size:14px;padding:0 2px">×</button>`:''}
+          <span class="exp-cat-total" id="exp-total-${cat.v}" style="color:${isExtra?'var(--rd)':'var(--mu2)'}">${existVal?'−'+fmt(Math.abs(existVal)):'—'}</span>
+        </div>
       </div>
       <div class="exp-inputs" id="exp-inputs-${cat.v}">
         ${parts.map((v,i)=>`
@@ -2982,11 +3008,67 @@ function buildExpCats(pid){
     </div>`;
   });
 
+  // Кнопка добавления доп. категории расходов
+  const availableCats = CATS.filter(c=>!allExpCats.find(e=>e.v===c.v));
+  h+=`<div style="padding:10px 20px 6px">
+    <div style="position:relative">
+      <button onclick="toggleExpCatPicker('${pid}')" class="exp-add-row-btn" style="border-style:solid;border-color:rgba(192,57,43,.4);color:var(--rd);width:auto;padding:7px 16px">
+        + Добавить категорию расходов
+      </button>
+      <div id="exp-cat-picker-${pid}" style="display:none;position:absolute;left:0;top:calc(100% + 6px);z-index:100;
+        background:var(--bg3);border:1px solid var(--b2);border-radius:12px;padding:8px;
+        min-width:240px;max-height:280px;overflow-y:auto;
+        box-shadow:0 8px 24px rgba(0,0,0,.5)">
+        <div style="font-size:10px;color:var(--mu);padding:4px 8px 8px;font-weight:600;text-transform:uppercase;letter-spacing:.06em">Выберите категорию</div>
+        ${availableCats.map(c=>`
+          <button onclick="addExtraExpCat('${pid}','${c.v}','${c.l}')"
+            style="display:block;width:100%;text-align:left;padding:8px 12px;background:none;border:none;
+            color:var(--tx);font-size:13px;cursor:pointer;border-radius:8px;transition:background .1s"
+            onmouseover="this.style.background='rgba(255,255,255,.06)'"
+            onmouseout="this.style.background='none'">
+            <span style="font-size:10px;color:var(--mu);display:block;margin-bottom:1px">вычет из дохода</span>
+            ${c.l}
+          </button>`).join('')}
+      </div>
+    </div>
+  </div>`;
+
   document.getElementById('exp-cats-wrap').innerHTML=h;
   document.getElementById('exp-cats-wrap').style.display='block';
   document.getElementById('exp-foot').style.display='flex';
   calcExpTotal();
 }
+
+function toggleExpCatPicker(pid){
+  const picker=document.getElementById('exp-cat-picker-'+pid);
+  if(!picker)return;
+  picker.style.display=picker.style.display==='none'?'block':'none';
+  // Закрываем при клике вне
+  if(picker.style.display==='block'){
+    setTimeout(()=>{
+      document.addEventListener('click',function closePicker(e){
+        if(!picker.contains(e.target)){picker.style.display='none';document.removeEventListener('click',closePicker);}
+      });
+    },100);
+  }
+}
+
+function addExtraExpCat(pid, catV, catL){
+  if(!window._extraExpCats) window._extraExpCats={};
+  if(!window._extraExpCats[pid]) window._extraExpCats[pid]=[];
+  if(!window._extraExpCats[pid].find(c=>c.v===catV)){
+    window._extraExpCats[pid].push({v:catV,l:catL});
+  }
+  buildExpCats(pid);
+}
+
+function removeExtraExpCat(pid, catV){
+  if(!window._extraExpCats||!window._extraExpCats[pid])return;
+  window._extraExpCats[pid]=window._extraExpCats[pid].filter(c=>c.v!==catV);
+  buildExpCats(pid);
+}
+
+// addExpRow and other expense helpers below
 
 function addExpRow(catV){
   const wrap=document.getElementById('exp-inputs-'+catV);
@@ -3053,14 +3135,23 @@ async function saveExpenses(){
     const date=expY+'-'+String(expM).padStart(2,'0')+'-01';
     const rows=[];
 
-    EXP_CATS.forEach(cat=>{
+    const extraExpCats2=(window._extraExpCats&&window._extraExpCats[selExpPt])||[];
+    const extraExpKeys=new Set(extraExpCats2.map(c=>c.v));
+    const allExpCatsToSave=[...EXP_CATS,...extraExpCats2];
+    const incDeductRows=[]; // вычеты из доходов — сохраняются в income_entries с минусом
+    allExpCatsToSave.forEach(cat=>{
       const wrap=document.getElementById('exp-inputs-'+cat.v);
       if(!wrap)return;
       const vals=Array.from(wrap.querySelectorAll('.exp-num-inp')).map(i=>parseFloat(i.value)||0).filter(v=>v>0);
       if(!vals.length)return;
       const total=vals.reduce((s,v)=>s+v,0);
       const notes=vals.length>1?vals.join('+'):'';
-      rows.push({point_id:selExpPt,month_id:mid2,category:cat.v,label:cat.l,amount:total,entry_date:date,notes});
+      if(extraExpKeys.has(cat.v)){
+        // Доп. категория — вычет из дохода (income_entries с отрицательной суммой)
+        incDeductRows.push({point_id:selExpPt,month_id:mid2,category:cat.v,label:cat.l,amount:-total,entry_date:date,notes:'deduct:'+notes});
+      } else {
+        rows.push({point_id:selExpPt,month_id:mid2,category:cat.v,label:cat.l,amount:total,entry_date:date,notes});
+      }
     });
 
     if(!rows.length){toast('Нет сумм');btn.disabled=false;btn.textContent='Сохранить';return;}
@@ -3068,7 +3159,19 @@ async function saveExpenses(){
     // Удаляем старые и вставляем новые
     const cats=rows.map(r=>r.category);
     await db.from('expense_entries').delete().eq('month_id',mid2).eq('point_id',selExpPt).in('category',cats);
-    await db.from('expense_entries').insert(rows);
+    if(rows.length) await db.from('expense_entries').insert(rows);
+    // Сохраняем вычеты из доходов
+    if(incDeductRows.length){
+      const deductCats=incDeductRows.map(r=>r.category);
+      // Удаляем только deduct-записи (с notes начинающимися на 'deduct:')
+      const {data:oldDeducts}=await db.from('income_entries')
+        .select('id').eq('month_id',mid2).eq('point_id',selExpPt).in('category',deductCats);
+      if(oldDeducts&&oldDeducts.length){
+        const deductIds=oldDeducts.map(r=>r.id);
+        await db.from('income_entries').delete().in('id',deductIds);
+      }
+      await db.from('income_entries').insert(incDeductRows);
+    }
 
     toast('✓ Расходы сохранены');
     await refreshAllData();
