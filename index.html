@@ -90,7 +90,7 @@ body{background:var(--bg);background-image:radial-gradient(ellipse at 20% 0%,rgb
 .ptw{background:var(--bg2);border:1px solid var(--b);border-radius:10px;overflow:hidden;margin-bottom:6px}
 /* ── КАРТОЧКИ ПУНКТОВ ───────────────────────────────────── */
 .pt-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px;margin-bottom:10px}
-.pt-card{background:var(--bg2);border:1px solid var(--b);border-radius:10px;padding:12px 14px;cursor:pointer;transition:background .15s}
+.pt-card{background:var(--bg2);border:1px solid var(--b);border-radius:10px;padding:12px 14px;cursor:pointer;transition:background .15s;overflow:hidden;min-width:0}
 .pt-card:hover{background:var(--bg3)}
 .pt-card.open{background:var(--bg3)}
 .pt-card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:8px}
@@ -129,17 +129,16 @@ body{background:var(--bg);background-image:radial-gradient(ellipse at 20% 0%,rgb
 .arch-rb:hover{border-color:var(--b);color:var(--mu)}
 
 /* SUBCATS */
-.subcats{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--b)}
-@media(max-width:680px){.subcats{grid-template-columns:1fr}}
-.subcat-col{padding:12px 14px}
-.subcat-col:first-child{border-right:1px solid var(--b)}
+.subcats{display:grid;grid-template-columns:1fr;border-top:1px solid var(--b);overflow:hidden}
+.subcat-col{padding:12px 14px;min-width:0;overflow:hidden}
+.subcat-col:first-child{border-bottom:1px solid var(--b)}
 .subcat-col h4{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--mu);margin-bottom:8px}
-.sub-row{display:flex;justify-content:space-between;align-items:baseline;padding:4px 0;border-bottom:1px solid var(--b)}
+.sub-row{display:flex;justify-content:space-between;align-items:baseline;padding:4px 0;border-bottom:1px solid var(--b);gap:6px}
 .sub-row:last-child{border-bottom:none}
-.sub-lbl{font-size:12px;color:var(--mu)}
+.sub-lbl{font-size:12px;color:var(--mu);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .sub-vals{display:flex;gap:10px;align-items:baseline}
 .sub-full{font-family:inherit;font-size:12px;color:var(--tx)}
-.sub-my{font-family:monospace;font-size:11px;color:var(--mu)}
+.sub-my{font-size:11px;color:var(--mu);white-space:nowrap;flex-shrink:0}
 
 /* ADD SECTION */
 .add-section{padding:12px 14px;border-top:1px solid var(--b)}
@@ -1237,8 +1236,11 @@ function renderMultiMonthView(v, n, overrideMonths){
       const mpc2=p.marketplace==='yandex'?'my':p.marketplace==='ozon'?'mo':'mw';
       const borderCol=s.net>=0?'var(--gr)':'var(--rd)';
       const grpGrad2={'A':'rgba(142,68,199,.13)','AD':'rgba(58,159,191,.13)','YM':'rgba(184,150,10,.13)'}[g]||'transparent';
-      h+=`<div class="pt-card" style="border-left:3px solid ${borderCol};background:linear-gradient(135deg,${grpGrad2} 0%,var(--bg2) 60%)">
-        <div class="pt-card-head">
+      const isO=open===p.id;
+      const icat=incByCat(s.iRows);
+      const xcat=expByCat(s.xRows);
+      h+=`<div class="pt-card${isO?' open':''}" style="border-left:3px solid ${borderCol};background:linear-gradient(135deg,${grpGrad2} 0%,var(--bg2) 60%)">
+        <div class="pt-card-head" onclick="tog('${p.id}')" style="cursor:pointer">
           <div class="pi"><span class="mt ${mpc2}">${p.marketplace.toUpperCase()}</span><span class="pa">${p.address}</span></div>
           <span class="pt-card-profit ${cc(s.net)}">${fmt(s.net)}</span>
         </div>
@@ -1247,6 +1249,16 @@ function renderMultiMonthView(v, n, overrideMonths){
           <div class="pt-card-num"><span class="pt-card-lbl">Расход</span><span style="color:var(--mu)">${fmt(s.xM)}</span></div>
           <div class="pt-card-num"><span class="pt-card-lbl">Налог</span><span style="color:var(--am)">${fmt(s.tax)}</span></div>
         </div>
+        ${isO?`<div class="pd open" style="margin-top:10px">
+          <div class="subcats">
+            <div class="subcat-col"><h4>Доходы</h4>
+              ${Object.keys(icat).length?Object.entries(icat).map(([cat,v])=>`<div class="sub-row"><span class="sub-lbl">${CL[cat]||cat}</span><span class="sub-my" style="color:var(--gr)">${fmt(v.my)}</span></div>`).join(''):'<div style="color:var(--mu2);font-size:12px">Нет записей</div>'}
+            </div>
+            <div class="subcat-col"><h4>Расходы</h4>
+              ${Object.keys(xcat).length?Object.entries(xcat).map(([cat,v])=>`<div class="sub-row"><span class="sub-lbl">${CL[cat]||cat}</span><span class="sub-my" style="color:var(--rd)">${fmt(v.my)}</span></div>`).join(''):'<div style="color:var(--mu2);font-size:12px">Нет записей</div>'}
+            </div>
+          </div>
+        </div>`:''}
       </div>`;
     });
     h+=`</div></div>`;
