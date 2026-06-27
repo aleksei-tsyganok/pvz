@@ -959,13 +959,13 @@ function getRangeMonths(n){
 
 // ── CALCS ────────────────────────────────────────────────────
 function ps(p,iData,xData){
-  const allowed=ptCatSettings[p.id]; // undefined = показываем всё
-  // Фильтруем доходы по настройкам (только доп. категории, базовые АВ не трогаем)
+  const allowed=ptCatSettings[p.id];
   const i=iData.filter(e=>e.point_id===p.id&&(allowed===undefined||BASE_CATS.includes(e.category)||allowed.includes(e.category)));
   const x=xData.filter(e=>e.point_id===p.id);
   const iM=i.reduce((s,e)=>s+Number(e.amount),0);
   const xM=x.reduce((s,e)=>s+Number(e.amount),0);
-  const tb=i.filter(e=>!e.tax_exempt).reduce((s,e)=>s+Number(e.amount),0);
+  // Deduct-записи не должны влиять на налоговую базу — они уже вычтены из дохода
+  const tb=i.filter(e=>!e.tax_exempt&&!(e.notes&&e.notes.startsWith('deduct:'))&&Number(e.amount)>0).reduce((s,e)=>s+Number(e.amount),0);
   const tax=tb*p.tax_rate;
   return{iT:iM,xT:xM,iM,xM,tax,net:iM-xM-tax,iRows:i,xRows:x};
 }
@@ -2059,7 +2059,9 @@ async function cancelAllEntries(){
     let {data:mRowC}=await db.from('months').select('id').eq('year',entryY).eq('month',entryM).maybeSingle();
     const cancelMid=mRowC?.id||mid;
     if(cat.type==='income'){
-      await db.from('income_entries').delete().eq('month_id',cancelMid).eq('category',selCat).in('point_id',pids);
+      const {data:oldC}=await db.from('income_entries').select('id,notes,amount').eq('month_id',cancelMid).eq('category',selCat).in('point_id',pids);
+      const toDelC=(oldC||[]).filter(e=>!(e.notes&&e.notes.startsWith('deduct:'))&&Number(e.amount)>=0).map(e=>e.id);
+      if(toDelC.length) await db.from('income_entries').delete().in('id',toDelC);
     }else{
       await db.from('expense_entries').delete().eq('month_id',cancelMid).eq('category',selCat).in('point_id',pids);
     }
@@ -2085,7 +2087,9 @@ async function cancelEntry(pointId){
     let {data:mRowX}=await db.from('months').select('id').eq('year',entryY).eq('month',entryM).maybeSingle();
     const cancelMidX=mRowX?.id||mid;
     if(cat.type==='income'){
-      await db.from('income_entries').delete().eq('month_id',cancelMidX).eq('category',selCat).eq('point_id',pointId);
+      const {data:oldX}=await db.from('income_entries').select('id,notes,amount').eq('month_id',cancelMidX).eq('category',selCat).eq('point_id',pointId);
+      const toDelX=(oldX||[]).filter(e=>!(e.notes&&e.notes.startsWith('deduct:'))&&Number(e.amount)>=0).map(e=>e.id);
+      if(toDelX.length) await db.from('income_entries').delete().in('id',toDelX);
     }else{
       await db.from('expense_entries').delete().eq('month_id',cancelMidX).eq('category',selCat).eq('point_id',pointId);
     }
@@ -2254,7 +2258,11 @@ async function saveAll(){
     // Удаляем старые записи этой категории за этот месяц для каждого пункта
     const pids=rows.map(r=>r.p.id);
     if(cat.type==='income'){
-      await db.from('income_entries').delete().eq('month_id',entryMid).eq('category',selCat).in('point_id',pids);
+      // Удаляем только обычные доходные записи (не deduct-вычеты)
+      const {data:oldInc}=await db.from('income_entries').select('id,notes,amount')
+        .eq('month_id',entryMid).eq('category',selCat).in('point_id',pids);
+      const toDelete=(oldInc||[]).filter(e=>!(e.notes&&e.notes.startsWith('deduct:'))&&Number(e.amount)>=0).map(e=>e.id);
+      if(toDelete.length) await db.from('income_entries').delete().in('id',toDelete);
       await db.from('income_entries').insert(rows.map(r=>({point_id:r.p.id,month_id:entryMid,category:selCat,label:r.lbl,amount:r.amt,entry_date:r.dat,tax_exempt:r.tex,notes:r.notes})));
     }else{
       await db.from('expense_entries').delete().eq('month_id',entryMid).eq('category',selCat).in('point_id',pids);
@@ -3238,8 +3246,14 @@ async function saveExpenses(){
     const rows=[];
 
     const extraExpCats2=(window._extraExpCats&&window._extraExpCats[selExpPt])||[];
-    const extraExpKeys=new Set(extraExpCats2.map(c=>c.v));
-    const allExpCatsToSave=[...EXP_CATS,...extraExpCats2];
+    // Также берём категории которые появились автоматически из deduct-данных в базе
+    const deductCatsAuto=allInc
+      .filter(e=>e.point_id===selExpPt&&Number(e._month)===expM&&Number(e._year)===expY&&e.notes&&e.notes.startsWith('deduct:'))
+      .map(e=>({v:e.category,l:CL[e.category]||e.category}))
+      .filter((d,i,arr)=>arr.findIndex(x=>x.v===d.v)===i); // уникальные
+    const allExtraKeys=new Set([...extraExpCats2,...deductCatsAuto].map(c=>c.v));
+    const extraExpKeys=allExtraKeys;
+    const allExpCatsToSave=[...EXP_CATS,...extraExpCats2,...deductCatsAuto.filter(d=>!extraExpCats2.find(e=>e.v===d.v))];
     const incDeductRows=[]; // вычеты из доходов — сохраняются в income_entries с минусом
     allExpCatsToSave.forEach(cat=>{
       const wrap=document.getElementById('exp-inputs-'+cat.v);
@@ -3250,7 +3264,8 @@ async function saveExpenses(){
       const notes=vals.length>1?vals.join('+'):'';
       if(extraExpKeys.has(cat.v)){
         // Доп. категория — вычет из дохода (income_entries с отрицательной суммой)
-        incDeductRows.push({point_id:selExpPt,month_id:mid2,category:cat.v,label:cat.l,amount:-total,entry_date:date,notes:'deduct:'+notes});
+        const deductCat=CATS.find(c=>c.v===cat.v);
+        incDeductRows.push({point_id:selExpPt,month_id:mid2,category:cat.v,label:cat.l,amount:-total,entry_date:date,tax_exempt:deductCat?.taxExempt||false,notes:'deduct:'+notes});
       } else {
         rows.push({point_id:selExpPt,month_id:mid2,category:cat.v,label:cat.l,amount:total,entry_date:date,notes});
       }
