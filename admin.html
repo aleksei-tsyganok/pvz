@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Панель управления — ПВЗ Анкеты</title>
+<style>
+:root{--ozon:#005BFF;--wb:#CB11AB;--ym:#FFCC00;--bg:#f4f6f9;--surface:#fff;--text:#1a1a2e;--text2:#5a6a7a;--border:#dce3ed;--radius:14px;--radius-sm:8px;--shadow:0 2px 8px rgba(0,0,0,.06);--shadow-lg:0 8px 30px rgba(0,0,0,.1);--font:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:1.6}
+.container{max-width:1100px;margin:0 auto;padding:0 20px;width:100%}
+
+/* LOGIN */
+.screen{display:flex;align-items:center;justify-content:center;min-height:100vh}
+.screen[hidden]{display:none}
+#dash-screen{display:block;min-height:100vh}
+#dash-screen[hidden]{display:none}
+.login{background:var(--surface);border-radius:var(--radius);padding:36px;box-shadow:var(--shadow-lg);width:100%;max-width:380px}
+.login h1{font-size:1.4rem;text-align:center}
+.login .sub{text-align:center;margin-bottom:22px;color:var(--text2);font-size:.9rem}
+.fg{margin-bottom:14px}
+.fg label{display:block;font-size:.82rem;font-weight:500;margin-bottom:5px;color:var(--text2)}
+input,textarea,select{width:100%;padding:10px 13px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:.92rem;font-family:inherit;background:var(--surface);color:var(--text);outline:none;transition:border-color .2s}
+input:focus,select:focus{border-color:var(--ozon);box-shadow:0 0 0 3px rgba(0,91,255,.12)}
+.err{background:#fef2f2;color:var(--danger);border:1px solid #fecaca;border-radius:var(--radius-sm);padding:10px 14px;font-size:.85rem;margin-bottom:12px;display:none}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:9px 18px;border:1.5px solid transparent;border-radius:var(--radius-sm);font-size:.85rem;font-weight:500;font-family:inherit;cursor:pointer;transition:all .2s;white-space:nowrap}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn-p{background:linear-gradient(135deg,var(--ozon),var(--wb));color:#fff;border:none}
+.btn-p:hover:not(:disabled){background:linear-gradient(135deg,#004ad4,#a8158f);box-shadow:0 4px 15px rgba(0,91,255,.3)}
+.btn-o{background:transparent;color:var(--text);border-color:var(--border)}
+.btn-o:hover{border-color:var(--ozon);color:var(--ozon)}
+.btn-sm{padding:5px 12px;font-size:.78rem}
+.btn-block{width:100%}
+.btn-lg{padding:12px 24px;font-size:.92rem}
+
+/* HEADER */
+.hdr{background:linear-gradient(135deg,var(--ozon) 0%,#3a7bff 25%,var(--wb) 55%,#e03db3 65%,var(--ym) 100%);color:#fff;padding:14px 0;position:relative;overflow:hidden}
+.hdr::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at 80% 40%,rgba(255,204,0,.35),transparent 60%);pointer-events:none}
+.hdr .container{position:relative;z-index:1}
+.hdr-row{display:flex;align-items:center;justify-content:space-between}
+.hdr-row h1{font-size:1.15rem}
+.hdr-r{display:flex;align-items:center;gap:14px}
+.admin-name{font-size:.85rem;opacity:.9}
+.pw-mob{display:none}
+
+/* STATS */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;margin:18px 0}
+.sc{background:var(--surface);border-radius:var(--radius-sm);padding:14px;text-align:center;box-shadow:var(--shadow);border-left:4px solid var(--border)}
+.sc .v{display:block;font-size:1.35rem;font-weight:700}
+.sc .l{font-size:.75rem;color:var(--text2);text-transform:uppercase;letter-spacing:.4px}
+.sc.s-new{border-left-color:#3b82f6}
+.sc.s-rev{border-left-color:#f59e0b}
+.sc.s-hir{border-left-color:#22c55e}
+.sc.s-rej{border-left-color:#ef4444}
+
+/* FILTERS */
+.ft{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;margin:16px 0}
+.ft .fg{min-width:150px;flex:1;margin-bottom:0}
+.ft .fg.srch{flex:2}
+.ft-acts{display:flex;gap:6px;padding-bottom:2px}
+@media(max-width:700px){.ft{flex-wrap:wrap}.ft .fg{min-width:auto;flex:1 1 calc(50% - 5px)}.ft .fg.srch{flex:1 1 100%;order:3}.ft-acts{flex:1 1 100%;order:4}}
+
+/* TABLE */
+.tw{background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow);overflow-x:auto;margin-bottom:40px}
+.loading{padding:36px;text-align:center;color:var(--text2);display:none}
+table{width:100%;border-collapse:collapse;font-size:.84rem}
+th{background:#f8fafc;padding:10px 14px;text-align:left;font-weight:600;font-size:.76rem;text-transform:uppercase;letter-spacing:.3px;color:var(--text2);border-bottom:2px solid var(--border);white-space:nowrap}
+td{padding:10px 14px;border-bottom:1px solid var(--border);vertical-align:middle}
+tr:hover td{background:#f8fafc}
+.empty{text-align:center;color:var(--text2);padding:36px!important}
+.card-list{display:none}
+
+.badge{display:inline-flex;padding:3px 9px;border-radius:20px;font-size:.75rem;font-weight:500}
+.badge.new{background:#dbeafe;color:#1d4ed8}
+.badge.reviewed{background:#fef3c7;color:#b45309}
+.badge.hired{background:#dcfce7;color:#16a34a}
+.badge.rejected{background:#fee2e2;color:#dc2626}
+
+.thumb{width:36px;height:36px;border-radius:50%;object-fit:cover;cursor:pointer;border:2px solid var(--border);transition:border-color .2s}
+.thumb:hover{border-color:var(--ozon)}
+.thumb-ph{width:36px;height:36px;border-radius:50%;background:#e2e8f0;display:flex;align-items:center;justify-content:center;color:#94a3b8;font-size:.85rem;flex-shrink:0}
+
+/* MODAL */
+.modal{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:1000;padding:20px}
+.modal[hidden]{display:none}
+.mb{position:absolute;inset:0;background:rgba(0,0,0,.4)}
+.mc{position:relative;background:var(--surface);border-radius:var(--radius);max-width:580px;width:100%;max-height:85vh;overflow-y:auto;box-shadow:var(--shadow-lg)}
+.mh{display:flex;justify-content:space-between;align-items:center;padding:18px 22px 0}
+.mh h2{font-size:1.1rem}
+.mx{background:none;border:none;font-size:1.4rem;cursor:pointer;color:var(--text2);padding:2px 8px;border-radius:4px}
+.mx:hover{background:var(--bg)}
+.md{padding:18px 22px}
+.mf{padding:14px 22px 18px;border-top:1px solid var(--border);display:flex;gap:6px;flex-wrap:wrap}
+.mf .btn{flex:1;min-width:80px}
+.mf .btn.s-new{background:#dbeafe;color:#1d4ed8;border-color:#bfdbfe}
+.mf .btn.s-rev{background:#fef3c7;color:#b45309;border-color:#fde68a}
+.mf .btn.s-hir{background:#dcfce7;color:#16a34a;border-color:#bbf7d0}
+.mf .btn.s-rej{background:#fee2e2;color:#dc2626;border-color:#fecaca}
+.mf .btn:hover:not(:disabled){filter:brightness(.95)}
+
+.df{margin-bottom:14px}
+.df:last-child{margin-bottom:0}
+.dl{display:block;font-size:.74rem;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.3px;margin-bottom:3px}
+.dv{font-size:.9rem;line-height:1.5}
+.dv a{color:var(--ozon);text-decoration:none}
+.dv a:hover{text-decoration:underline}
+.ds{width:100px;height:100px;border-radius:50%;object-fit:cover;border:3px solid var(--border);margin:0 auto}
+.cf{margin-top:12px}
+.cf textarea{min-height:55px}
+
+@media(max-width:480px){
+  .container{padding:0 12px}
+  .login{padding:24px 18px}
+  .login h1{font-size:1.2rem}
+  .hdr{padding:8px 0}
+  .hdr-row h1{font-size:.85rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .hdr-r{gap:2px}
+  .admin-name{display:none}
+  .pw-dt{display:none}
+  .pw-mob{display:inline}
+  .stats{grid-template-columns:repeat(3,1fr);gap:4px;margin:8px 0}
+  .sc{padding:4px 4px;border-left-width:1px;border-radius:6px}
+  .sc .v{font-size:.7rem}
+  .sc .l{font-size:.5rem;letter-spacing:.1px}
+  .ft{gap:6px;flex-direction:row}
+  .ft .fg{min-width:0;flex:1 1 calc(50% - 3px)}
+  .ft .fg.srch{flex:1 1 100%}
+  .ft-acts{gap:4px;width:100%;flex:1 1 100%}
+  .ft-acts .btn{flex:1}
+  .tw{overflow-x:visible;border-radius:0;box-shadow:none;background:transparent;margin:0 -12px}
+  .tw table,.tw thead{display:none}
+  .tw .loading{margin:0 12px;border-radius:var(--radius-sm)}
+  .card-list{display:flex;flex-direction:column;gap:8px;padding:8px 12px 12px}
+  .card{background:var(--surface);border-radius:var(--radius-sm);padding:10px 12px;box-shadow:var(--shadow)}
+  .card-line{display:flex;justify-content:space-between;align-items:center;gap:4px;padding:2px 0;font-size:.8rem}
+  .card-label{font-size:.68rem;color:var(--text2);white-space:nowrap;flex-shrink:0}
+  .card-val{text-align:right;min-width:0}
+  .card-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;padding-bottom:6px;border-bottom:1px solid var(--border)}
+  .card-user{display:flex;align-items:center;gap:6px;font-weight:600;font-size:.85rem;min-width:0}
+  .card-user .thumb,.card-user .thumb-ph{width:28px;height:28px}
+  .card-user .name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .card-acts{display:flex;gap:6px;margin-top:6px;padding-top:6px;border-top:1px solid var(--border)}
+  .card-acts .btn{flex:1;font-size:.75rem;padding:5px 6px}
+  .modal{padding:8px}
+  .mc{border-radius:12px;max-height:90vh}
+  .mh{padding:12px 14px 0}
+  .mh h2{font-size:1rem}
+  .md{padding:12px 14px}
+  .mf{padding:10px 14px 14px;gap:4px}
+  .mf .btn{font-size:.78rem;padding:7px 8px;min-width:0}
+  .ds{width:72px;height:72px}
+}
+
+/* ─── Бейджи маркетплейсов в шапке ─── */
+.hdr{padding-bottom:0 !important}
+.hdr-inner{display:flex;align-items:center;justify-content:space-between;padding:14px 0 10px}
+.mp-badges{
+  display:flex;gap:8px;
+  padding:0 0 10px;
+}
+.mp-badge{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:148px;
+  padding:6px 0;
+  border-radius:100px;
+  font-size:.75rem;font-weight:700;letter-spacing:.5px;text-transform:uppercase;
+  font-family:inherit;
+  user-select:none;
+}
+.mp-ozon-b{background:rgba(255,255,255,.18);color:#fff}
+.mp-wb-b{background:rgba(203,17,171,.35);color:#FFD6F5}
+.mp-ym-b{background:rgba(255,204,0,.22);color:#FFF3A3}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+
+<!-- LOGIN -->
+<div class="screen" id="login-screen">
+  <div class="login">
+    <h1>Панель управления</h1>
+    <p class="sub">Вход для администраторов</p>
+    <form id="login-form">
+      <div class="fg"><label for="lem">Email</label><input type="email" id="lem" required placeholder="admin@example.com"></div>
+      <div class="fg"><label for="lpw">Пароль</label><input type="password" id="lpw" required placeholder="••••••••"></div>
+      <div class="err" id="login-err"></div>
+      <button type="submit" class="btn btn-p btn-block btn-lg">Войти</button>
+    </form>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div class="screen" id="dash-screen" hidden>
+  <header class="hdr">
+    <div class="container">
+      <div class="hdr-inner">
+        <h1>Панель управления</h1>
+        <div class="hdr-r"><span class="admin-name" id="admin-name"></span><button class="btn btn-o btn-sm" id="pw-btn" style="color:#fff;border-color:rgba(255,255,255,.4)"><span class="pw-dt">Пароль</span><span class="pw-mob">🔑</span></button><button class="btn btn-o btn-sm" id="logout-btn" style="color:#fff;border-color:rgba(255,255,255,.4)">Выйти</button></div>
+      </div>
+      <div class="mp-badges">
+        <span class="mp-badge mp-ozon-b">OZON</span>
+        <span class="mp-badge mp-wb-b">Wildberries</span>
+        <span class="mp-badge mp-ym-b">Яндекс Маркет</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="stats">
+      <div class="sc"><span class="v" id="s-all">0</span><span class="l">Всего</span></div>
+      <div class="sc s-new"><span class="v" id="s-new">0</span><span class="l">Новые</span></div>
+      <div class="sc s-rev"><span class="v" id="s-rev">0</span><span class="l">Просмотрено</span></div>
+      <div class="sc s-hir"><span class="v" id="s-hir">0</span><span class="l">Принято</span></div>
+      <div class="sc s-rej"><span class="v" id="s-rej">0</span><span class="l">Отказ</span></div>
+    </div>
+
+    <div class="ft">
+      <div class="fg"><label for="f-st">Статус</label><select id="f-st"><option value="">Все</option><option value="new">Новые</option><option value="reviewed">Просмотрено</option><option value="hired">Принят</option><option value="rejected">Отказ</option></select></div>
+      <div class="fg"><label for="f-mp">Маркетплейс</label><select id="f-mp"><option value="">Все</option><option value="ozon">OZON</option><option value="wb">Wildberries</option><option value="yandex_market">Яндекс Маркет</option></select></div>
+      <div class="fg srch"><label for="f-srch">Поиск</label><input type="text" id="f-srch" placeholder="Имя, телефон, email..."></div>
+      <div class="ft-acts"><button class="btn btn-p" id="apply-f">Применить</button><button class="btn btn-o" id="reset-f">Сбросить</button></div>
+    </div>
+
+    <div class="tw">
+      <div class="loading" id="loading">Загрузка...</div>
+      <table><thead><tr><th>Дата</th><th>ФИО</th><th>Телефон</th><th>Маркетплейс</th><th>Адрес</th><th>Статус</th><th></th></tr></thead><tbody id="tbody"></tbody></table>
+    </div>
+  </main>
+</div>
+
+<!-- MODAL (детали анкеты) -->
+<div class="modal" id="modal" hidden>
+  <div class="mb" id="modal-bg"></div>
+  <div class="mc">
+    <div class="mh"><h2>Детали анкеты</h2><button class="mx" id="modal-x">&times;</button></div>
+    <div class="md" id="modal-body"></div>
+    <div class="mf" id="modal-footer">
+      <button class="btn s-new" data-st="new">В новый</button>
+      <button class="btn s-rev" data-st="reviewed">Просмотрено</button>
+      <button class="btn s-hir" data-st="hired">Принять</button>
+      <button class="btn s-rej" data-st="rejected">Отказ</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL (смена пароля) -->
+<div class="modal" id="pw-modal" hidden>
+  <div class="mb" id="pw-modal-bg"></div>
+  <div class="mc" style="max-width:400px">
+    <div class="mh"><h2 id="pw-title">Сменить пароль</h2><button class="mx" id="pw-modal-x">&times;</button></div>
+    <form id="pw-form">
+      <div class="md">
+        <div class="fg"><label for="pw-old">Текущий пароль</label><input type="password" id="pw-old" required></div>
+        <div class="fg"><label for="pw-new">Новый пароль</label><input type="password" id="pw-new" required minlength="6"></div>
+        <div class="fg"><label for="pw-confirm">Подтвердите новый пароль</label><input type="password" id="pw-confirm" required></div>
+        <div class="err" id="pw-err"></div>
+      </div>
+      <div class="mf" style="border-top:none;padding-top:0">
+        <button type="submit" class="btn btn-p btn-block" id="pw-save">Сохранить</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script>
+const SUPABASE_URL='https://jqseowqgwvyjbagzkwpm.supabase.co';
+const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impxc2Vvd3Fnd3Z5amJhZ3prd3BtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI1NTM1NDEsImV4cCI6MjA5ODEyOTU0MX0.6PA1jsxwR0wg9S6sH8QgcKQJ3qo5N4QjEPVTMNR7L2Y';
+let sb;
+try{sb=supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY)}catch(e){console.warn('Supabase init error',e)}
+
+const MP={ozon:'OZON',wb:'Wildberries',yandex_market:'Яндекс Маркет'};
+const ST={new:'Новая',reviewed:'Просмотрено',hired:'Принят',rejected:'Отказ'};
+
+const loginScreen=document.getElementById('login-screen'),dashScreen=document.getElementById('dash-screen');
+const loginForm=document.getElementById('login-form'),lem=document.getElementById('lem'),lpw=document.getElementById('lpw'),loginErr=document.getElementById('login-err');
+const adminName=document.getElementById('admin-name'),logoutBtn=document.getElementById('logout-btn');
+const tbody=document.getElementById('tbody'),loading=document.getElementById('loading');
+const fSt=document.getElementById('f-st'),fMp=document.getElementById('f-mp'),fSrch=document.getElementById('f-srch');
+const applyF=document.getElementById('apply-f'),resetF=document.getElementById('reset-f');
+const modal=document.getElementById('modal'),modalBody=document.getElementById('modal-body'),modalFooter=document.getElementById('modal-footer');
+const modalX=document.getElementById('modal-x'),modalBg=document.getElementById('modal-bg');
+
+let admin=null,apps=[];
+
+async function init(){
+  try{
+    if(sb){
+      const {data:{session}}=await sb.auth.getSession();
+      if(session){
+        const {data:{user}}=await sb.auth.getUser();
+        if(user){
+          const {data}=await sb.from('admins').select('*').eq('email',user.email).single();
+          if(data){admin=data;showDash();return}
+        }
+      }
+    }
+  }catch(e){console.warn('Init error',e)}
+  showLogin()
+}
+
+function showLogin(){loginScreen.hidden=false;dashScreen.hidden=true}
+function showDash(){loginScreen.hidden=true;dashScreen.hidden=false;adminName.textContent=admin.full_name;checkPwChange();load()}
+
+async function checkPwChange(){
+  try{
+    const {data:{user}}=await sb.auth.getUser();
+    if(user&&!user.user_metadata?.password_changed)showPwModal(true)
+  }catch(e){console.warn(e)}
+}
+
+loginForm.addEventListener('submit',async e=>{
+  e.preventDefault();loginErr.style.display='none';
+  if(!sb){loginErr.textContent='Supabase не загрузился, проверьте подключение к интернету';loginErr.style.display='block';return}
+  try{
+    const {error}=await sb.auth.signInWithPassword({email:lem.value.trim(),password:lpw.value});
+    if(error)throw error;
+    const {data:{user}}=await sb.auth.getUser();
+    const {data}=await sb.from('admins').select('*').eq('email',user.email).single();
+    if(!data){loginErr.textContent='Нет прав администратора';loginErr.style.display='block';return}
+    admin=data;showDash()
+  }catch(e){
+    loginErr.textContent=e.message||'Ошибка входа';
+    loginErr.style.display='block'
+  }
+});
+
+logoutBtn.addEventListener('click',async()=>{await sb.auth.signOut();admin=null;showLogin()});
+
+applyF.addEventListener('click',load);
+resetF.addEventListener('click',()=>{fSt.value='';fMp.value='';fSrch.value='';load()});
+
+async function load(){
+  loading.style.display='block';tbody.innerHTML='';
+  document.querySelector('.card-list')?.remove();
+  if(!sb){loading.textContent='Supabase не загружен';return}
+  try{
+    let q=sb.from('applications').select('*').order('created_at',{ascending:false});
+    if(fSt.value)q=q.eq('status',fSt.value);
+    if(fMp.value)q=q.eq('marketplace',fMp.value);
+    if(fSrch.value.trim())q=q.or(`full_name.ilike.%${fSrch.value.trim()}%,phone.ilike.%${fSrch.value.trim()}%,tg.ilike.%${fSrch.value.trim()}%`);
+    const {data,error}=await q;
+    if(error)throw error;
+    apps=data||[];render();stats()
+  }catch(e){tbody.innerHTML=`<tr><td colspan="7" class="empty">Ошибка: ${esc(e.message)}</td></tr>`}
+  finally{loading.style.display='none'}
+}
+
+function render(){
+  if(!apps.length){tbody.innerHTML='<tr><td colspan="7" class="empty">Нет данных</td></tr>';let cl=document.querySelector('.card-list');if(cl)cl.innerHTML='<div class="card" style="text-align:center;color:var(--text2);padding:20px">Нет данных</div>';return}
+  tbody.innerHTML=apps.map(a=>`<tr>
+    <td>${dmy(a.created_at)}</td>
+    <td><div style="display:flex;align-items:center;gap:7px">${a.selfie_url?`<img src="${a.selfie_url}" class="thumb" onclick="window.open('${a.selfie_url}')">`:'<div class="thumb-ph">?</div>'}<strong>${esc(a.full_name)}</strong></div></td>
+    <td>${esc(a.phone)}</td>
+    <td>${MP[a.marketplace]||a.marketplace}</td>
+    <td>${esc(a.primary_address)}</td>
+    <td><span class="badge ${a.status}">${ST[a.status]||a.status}</span></td>
+    <td><button class="btn btn-o btn-sm view" data-id="${a.id}">Открыть</button></td>
+  </tr>`).join('');
+  tbody.querySelectorAll('.view').forEach(b=>b.addEventListener('click',()=>open(b.dataset.id)));
+
+  let cl=document.querySelector('.card-list');if(!cl){cl=document.createElement('div');cl.className='card-list';document.querySelector('.tw').appendChild(cl)}
+  cl.innerHTML=apps.map(a=>`<div class="card">
+    <div class="card-top">
+      <div class="card-user">${a.selfie_url?`<img src="${a.selfie_url}" class="thumb">`:'<div class="thumb-ph">?</div>'}<span class="name">${esc(a.full_name)}</span></div>
+      <span class="badge ${a.status}">${ST[a.status]||a.status}</span>
+    </div>
+    <div class="card-line"><span class="card-label">Тел.</span><span class="card-val">${esc(a.phone)}</span></div>
+    <div class="card-line"><span class="card-label">Маркет</span><span class="card-val">${MP[a.marketplace]||a.marketplace}</span></div>
+    <div class="card-line"><span class="card-label">Адрес</span><span class="card-val">${esc(a.primary_address)}</span></div>
+    <div class="card-line"><span class="card-label">Дата</span><span class="card-val">${dmy(a.created_at)}</span></div>
+    <div class="card-acts"><button class="btn btn-o btn-sm view" data-id="${a.id}">Открыть</button></div>
+  </div>`).join('');
+  cl.querySelectorAll('.view').forEach(b=>b.addEventListener('click',()=>open(b.dataset.id)))
+}
+
+function stats(){
+  document.getElementById('s-all').textContent=apps.length;
+  document.getElementById('s-new').textContent=apps.filter(a=>a.status==='new').length;
+  document.getElementById('s-rev').textContent=apps.filter(a=>a.status==='reviewed').length;
+  document.getElementById('s-hir').textContent=apps.filter(a=>a.status==='hired').length;
+  document.getElementById('s-rej').textContent=apps.filter(a=>a.status==='rejected').length
+}
+
+function open(id){
+  const a=apps.find(x=>x.id===id);if(!a)return;
+  modalBody.innerHTML=`
+    <div class="df" style="text-align:center">${a.selfie_url?`<img src="${a.selfie_url}" class="ds">`:'<div class="ds" style="background:#e2e8f0;display:flex;align-items:center;justify-content:center;color:#94a3b8;font-size:2rem">?</div>'}</div>
+    <div class="df"><span class="dl">ФИО</span><span class="dv">${esc(a.full_name)}</span></div>
+    <div class="df"><span class="dl">Дата рождения</span><span class="dv">${a.birth_date||'—'}</span></div>
+    <div class="df"><span class="dl">Телефон</span><span class="dv"><a href="tel:${esc(a.phone)}">${esc(a.phone)}</a></span></div>
+    <div class="df"><span class="dl">Email</span><span class="dv">${a.email?`<a href="mailto:${esc(a.email)}">${esc(a.email)}</a>`:'—'}</span></div>
+    <div class="df"><span class="dl">Опыт работы</span><span class="dv">${esc(a.experience)||'—'}</span></div>
+    <div class="df"><span class="dl">Образование</span><span class="dv">${esc(a.education)||'—'}</span></div>
+    <div class="df"><span class="dl">О себе</span><span class="dv">${esc(a.about)||'—'}</span></div>
+    <div class="df"><span class="dl">Маркетплейс</span><span class="dv">${MP[a.marketplace]||a.marketplace}</span></div>
+    <div class="df"><span class="dl">Основной адрес</span><span class="dv">${esc(a.primary_address)}</span></div>
+    <div class="df"><span class="dl">Резервный адрес 1</span><span class="dv">${esc(a.backup_address_1)||'—'}</span></div>
+    <div class="df"><span class="dl">Резервный адрес 2</span><span class="dv">${esc(a.backup_address_2)||'—'}</span></div>
+    <div class="df"><span class="dl">Статус</span><span class="dv"><span class="badge ${a.status}">${ST[a.status]||a.status}</span></span></div>
+    <div class="df"><span class="dl">Дата подачи</span><span class="dv">${dmy(a.created_at)}</span></div>
+    <div class="cf"><label class="dl" for="cmt">Комментарий</label><textarea id="cmt" rows="3">${esc(a.admin_comment||'')}</textarea></div>
+  `;
+  modalFooter.innerHTML=`
+    <button class="btn s-new" data-st="new">В новый</button>
+    <button class="btn s-rev" data-st="reviewed">Просмотрено</button>
+    <button class="btn s-hir" data-st="hired">Принять</button>
+    <button class="btn s-rej" data-st="rejected">Отказ</button>
+  `;
+  modalFooter.querySelectorAll('.btn').forEach(b=>{
+    b.addEventListener('click',async()=>{
+      const st=b.dataset.st,cmt=document.getElementById('cmt')?.value||'';
+      try{
+        const {error}=await sb.from('applications').update({status:st,admin_comment:cmt}).eq('id',id);
+        if(error)throw error;modal.hidden=true;load()
+      }catch(e){alert('Ошибка: '+e.message)}
+    })
+  });
+  modal.hidden=false
+}
+
+modalX.addEventListener('click',()=>modal.hidden=true);
+modalBg.addEventListener('click',()=>modal.hidden=true);
+document.addEventListener('keydown',e=>{if(e.key==='Escape')modal.hidden=true});
+
+// --- Смена пароля ---
+const pwModal=document.getElementById('pw-modal'),pwForm=document.getElementById('pw-form');
+const pwOld=document.getElementById('pw-old'),pwNew=document.getElementById('pw-new'),pwConfirm=document.getElementById('pw-confirm');
+const pwErr=document.getElementById('pw-err'),pwTitle=document.getElementById('pw-title'),pwBtn=document.getElementById('pw-btn');
+const pwModalX=document.getElementById('pw-modal-x'),pwModalBg=document.getElementById('pw-modal-bg'),pwSave=document.getElementById('pw-save');
+
+let pwForced=false;
+
+function showPwModal(forced){
+  pwForced=forced;
+  pwTitle.textContent=forced?'Требуется смена пароля':'Сменить пароль';
+  pwForm.reset();pwErr.style.display='none';
+  pwModal.hidden=false;
+  if(forced){
+    pwModalX.style.display='none';
+    pwModalBg.style.pointerEvents='none';
+    pwOld.placeholder='Введите текущий пароль';
+  }else{
+    pwModalX.style.display='';
+    pwModalBg.style.pointerEvents='';
+    pwOld.placeholder='';
+  }
+}
+function hidePwModal(){pwModal.hidden=true;pwForced=false}
+
+pwBtn.addEventListener('click',()=>showPwModal(false));
+pwModalX.addEventListener('click',hidePwModal);
+pwModalBg.addEventListener('click',()=>{if(!pwForced)hidePwModal()});
+
+pwForm.addEventListener('submit',async e=>{
+  e.preventDefault();pwErr.style.display='none';
+  const old=pwOld.value.trim(),nw=pwNew.value.trim(),cf=pwConfirm.value.trim();
+  if(nw.length<6){pwErr.textContent='Новый пароль — минимум 6 символов';pwErr.style.display='block';return}
+  if(nw!==cf){pwErr.textContent='Новые пароли не совпадают';pwErr.style.display='block';return}
+  pwSave.disabled=true;
+  try{
+    const {error}=await sb.auth.updateUser({password:nw});
+    if(error)throw error;
+    await sb.auth.updateUser({data:{password_changed:true}});
+    hidePwModal();
+    if(pwForced)load()
+  }catch(e){
+    pwErr.textContent=e.message||'Ошибка смены пароля';
+    pwErr.style.display='block'
+  }finally{pwSave.disabled=false}
+});
+
+function dmy(s){if(!s)return'—';const d=new Date(s);return d.toLocaleDateString('ru-RU',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'})}
+function esc(s){if(!s)return'';const d=document.createElement('div');d.textContent=s;return d.innerHTML}
+
+init()
+</script>
+</body>
+</html>
