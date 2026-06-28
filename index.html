@@ -1626,7 +1626,7 @@ function renderFullTable(v){
       function ptExp(m){ return EXPENSE_CATS.reduce((s,c)=>s+(rows[c.v]?.[m]||0),0); }
       function ptTax(m){
         // Налог считается от моей доли дохода (без tax_exempt)
-        const taxBase = INCOME_CATS.filter(c=>!c.taxExempt).reduce((s,c)=>s+(rows[c.v]?.[m]||0),0);
+        const taxBase = INCOME_CATS.filter(c=>!c.taxExempt).reduce((s,c)=>s+Math.max(0,rows[c.v]?.[m]||0),0);
         return taxBase * p.tax_rate;
       }
       function ptNet(m){ return ptInc(m)-ptExp(m)-ptTax(m); }
@@ -1701,7 +1701,7 @@ function renderFullTable(v){
           const rd=buildPointTableData(p);
           const ptI=CATS.filter(c=>c.type==='income').reduce((s,c)=>s+(rd[c.v]?.[m]||0),0);
           const ptE=CATS.filter(c=>c.type==='expense').reduce((s,c)=>s+(rd[c.v]?.[m]||0),0);
-          const taxB=CATS.filter(c=>c.type==='income'&&!c.taxExempt).reduce((s,c)=>s+(rd[c.v]?.[m]||0),0);
+          const taxB=CATS.filter(c=>c.type==='income'&&!c.taxExempt).reduce((s,c)=>s+Math.max(0,rd[c.v]?.[m]||0),0);
           return ptI-ptE-taxB*p.tax_rate;
         });
         const t=rows2.reduce((s,n)=>s+n,0);
@@ -1712,7 +1712,7 @@ function renderFullTable(v){
         return s+ms.reduce((ss,m)=>{
           const ptI=CATS.filter(c=>c.type==='income').reduce((si,c)=>si+(rd[c.v]?.[m]||0),0);
           const ptE=CATS.filter(c=>c.type==='expense').reduce((se,c)=>se+(rd[c.v]?.[m]||0),0);
-          const taxB=CATS.filter(c=>c.type==='income'&&!c.taxExempt).reduce((st,c)=>st+(rd[c.v]?.[m]||0),0);
+          const taxB=CATS.filter(c=>c.type==='income'&&!c.taxExempt).reduce((st,c)=>st+Math.max(0,rd[c.v]?.[m]||0),0);
           return ss+ptI-ptE-taxB*p.tax_rate;
         },0);
       },0))}</td>
@@ -1726,7 +1726,7 @@ function renderFullTable(v){
         const rd=buildPointTableData(p);
         const ptI=CATS.filter(c=>c.type==='income').reduce((si,c)=>si+(rd[c.v]?.[m]||0),0);
         const ptE=CATS.filter(c=>c.type==='expense').reduce((se,c)=>se+(rd[c.v]?.[m]||0),0);
-        const taxB=CATS.filter(c=>c.type==='income'&&!c.taxExempt).reduce((st,c)=>st+(rd[c.v]?.[m]||0),0);
+        const taxB=CATS.filter(c=>c.type==='income'&&!c.taxExempt).reduce((st,c)=>st+Math.max(0,rd[c.v]?.[m]||0),0);
         return s+ptI-ptE-taxB*p.tax_rate;
       },0);
       return`<td>${t?xfmt(t,'profit'):'<span class="fv zero">—</span>'}</td>`;
@@ -1736,7 +1736,7 @@ function renderFullTable(v){
       return s+ms.reduce((ss,m)=>{
         const ptI=CATS.filter(c=>c.type==='income').reduce((si,c)=>si+(rd[c.v]?.[m]||0),0);
         const ptE=CATS.filter(c=>c.type==='expense').reduce((se,c)=>se+(rd[c.v]?.[m]||0),0);
-        const taxB=CATS.filter(c=>c.type==='income'&&!c.taxExempt).reduce((st,c)=>st+(rd[c.v]?.[m]||0),0);
+        const taxB=CATS.filter(c=>c.type==='income'&&!c.taxExempt).reduce((st,c)=>st+Math.max(0,rd[c.v]?.[m]||0),0);
         return ss+ptI-ptE-taxB*p.tax_rate;
       },0);
     },0))}</td>
